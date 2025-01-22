@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: MRTKSettings
   m_EditorClassIdentifier: 
   settings:
-    entries: []
+    entries:
+    - key: 1
+      value: {fileID: 0}
   buildPreferences:
     appLauncherModel: {fileID: 0}
