@@ -3,6 +3,7 @@
     "com.microsoft.mixedreality.openxr": "file:MixedReality/com.microsoft.mixedreality.openxr-1.11.2.tgz",
     "com.microsoft.mrtk.graphicstools.unity": "file:MixedReality/com.microsoft.mrtk.graphicstools.unity-0.7.1.tgz",
     "com.microsoft.mrtk.tts.windows": "file:MixedReality/com.microsoft.mrtk.tts.windows-1.0.4.tgz",
+    "com.unity.2d.sprite": "1.0.0",
     "com.unity.ai.navigation": "2.0.5",
     "com.unity.collab-proxy": "2.6.0",
     "com.unity.device-simulator.devices": "1.0.0",
