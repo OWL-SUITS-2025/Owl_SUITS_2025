@@ -60,23 +60,54 @@ public class TELEMETRYDataHandler : MonoBehaviour
     void Start()
     {
         telemetryWrapper = new TelemetryWrapper();
+        telemetryWrapper.telemetry = new TelemetryData();
+        telemetryWrapper.telemetry.eva1 = new TelemetryEvaData();
+        telemetryWrapper.telemetry.eva2 = new TelemetryEvaData();
+
+        // Ensure the TSS reference is assigned
+        if (TSS == null)
+        {
+            TSS = FindObjectOfType<TSScDataHandler>();
+            if (TSS == null)
+            {
+                Debug.LogError("TSScDataHandler not found in the scene. Please assign it in the inspector.");
+            }
+        }
     }
 
-// Update is called once per frame
-void Update()
+    // Update is called once per frame
+    void Update()
     {
         UpdateTELEMETRYData();
     }
 
     void UpdateTELEMETRYData()
     {
+        // Make sure TSS is available
+        if (TSS == null)
+        {
+            Debug.LogWarning("TSScDataHandler reference is null");
+            return;
+        }
+
+
         // Store the JSON string for parsing
         string telemetryJsonString = TSS.GetTELEMETRYData();
-
+        
+        // Add check for empty or invalid JSON string
+        if (string.IsNullOrEmpty(telemetryJsonString))
+        {
+            Debug.LogWarning("Empty or null telemetry JSON string received");
+            return;
+        }
         // Parse JSON string into TelemetryWrapper object
         // This stores the JSON value into the TelemetryWrapper object
         telemetryWrapper = JsonUtility.FromJson<TelemetryWrapper>(telemetryJsonString);
-        // Debug.Log($" Heart Rate: {telemetryWrapper.telemetry.eva1.heart_rate}");
+
+
+
+
+        //  Debug.Log($" Heart Rate: {telemetryWrapper.telemetry.eva1.heart_rate}");
 
         // Access specific values
         // Debug.Log($"Deserialized Telemetry Data:\n" +
@@ -87,7 +118,7 @@ void Update()
         //           $"  EVA1 Oxy Time Left: {telemetryWrapper.telemetry.eva1.oxy_time_left}\n"
         // // Add more properties as needed
         // );
-    
+
     }
 
     // Use this function in other scripts to access the live telemetry data
