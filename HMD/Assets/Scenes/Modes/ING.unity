@@ -4026,7 +4026,7 @@ MonoBehaviour:
         m_Calls: []
   disabledInteractorTypes:
   - reference: MixedReality.Toolkit.IGrabInteractor, MixedReality.Toolkit.Core
-  <ToggleMode>k__BackingField: 0
+  <ToggleMode>k__BackingField: 1
   <SelectThreshold>k__BackingField: 0.9
   <DeselectThreshold>k__BackingField: 0.1
   <TriggerOnRelease>k__BackingField: 1
@@ -5537,7 +5537,7 @@ Transform:
   m_GameObject: {fileID: 759027851}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.004940007, y: 1.57936, z: 0.6007461}
+  m_LocalPosition: {x: 0, y: 1.57936, z: 0.6007461}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -8328,7 +8328,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1306612836}
   - component: {fileID: 1306612839}
-  - component: {fileID: 1306612838}
   - component: {fileID: 1306612837}
   m_Layer: 0
   m_Name: IngressHandler
@@ -8364,35 +8363,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a3e3aa8abc6dc54585fa130fc164b1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  telemetryDataHandler: {fileID: 0}
-  dataRanges: {fileID: 0}
-  uiaDataHandler: {fileID: 0}
-  dcuDataHandler: {fileID: 0}
-  ev1Background: {fileID: 0}
-  ev1Foreground: {fileID: 0}
-  ev2Background: {fileID: 0}
-  ev2Foreground: {fileID: 0}
-  ev1ProgressTextMeshPro: {fileID: 0}
-  ev2ProgressTextMeshPro: {fileID: 0}
-  taskStatusTextMeshPro: {fileID: 0}
-  stepTitleTextMeshPro: {fileID: 0}
-  taskTextMeshPro: {fileID: 0}
-  SwitchLocationText: {fileID: 0}
+  telemetryDataHandler: {fileID: 651319712}
+  dataRanges: {fileID: 1633086830}
+  uiaDataHandler: {fileID: 1903710474}
+  dcuDataHandler: {fileID: 2121798565}
+  ev1Background: {fileID: 2073624208}
+  ev1Foreground: {fileID: 256152117}
+  ev2Background: {fileID: 1996514567}
+  ev2Foreground: {fileID: 1238453845}
+  ev1ProgressTextMeshPro: {fileID: 636628048}
+  ev2ProgressTextMeshPro: {fileID: 800993629}
+  taskStatusTextMeshPro: {fileID: 1820779804}
+  stepTitleTextMeshPro: {fileID: 1115159854}
+  taskTextMeshPro: {fileID: 1820779804}
+  SwitchLocationText: {fileID: 2032687411}
   completedColor: {r: 0, g: 1, b: 0, a: 1}
   incompleteColor: {r: 1, g: 0, b: 0, a: 1}
   inProgressColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
---- !u!114 &1306612838
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1306612835}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47a8cb451886af243aeb34f9d5bd09d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1306612839
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9791,7 +9778,7 @@ GameObject:
   - component: {fileID: 1684071216}
   - component: {fileID: 1684071215}
   m_Layer: 0
-  m_Name: ToolHandMenu (1)
+  m_Name: ToolHandMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11154,7 +11141,7 @@ MonoBehaviour:
   trackedHandedness: 3
   trackedHandJoint: 0
   transformOverride: {fileID: 0}
-  additionalOffset: {x: 0, y: 0, z: 0}
+  additionalOffset: {x: 0.03, y: 0.03, z: 0.03}
   additionalRotation: {x: 0, y: 0, z: 0}
   updateSolvers: 1
 --- !u!1 &1996514566
