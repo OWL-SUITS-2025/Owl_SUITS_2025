@@ -70,6 +70,7 @@ public class LaunchMenuHandlers : MonoBehaviour
         // Get URL in Text Field
         string host;
 
+        int team;
         // Use this to HARDCODE the server address
 
         // Using NASA Rockyard IP:
@@ -77,12 +78,15 @@ public class LaunchMenuHandlers : MonoBehaviour
 
         // Using Local Server:
         host = "127.0.0.1";
+        
+        // This is for TSS, make sure ur in team in web panel 
+        team = 6;
 
         // Print Hostname to Logs
         Debug.Log("Button Pressed: " + host);
 
         // Connect to TSSc at that Host
-        TSSc.ConnectToHost(host, 6);
+        TSSc.ConnectToHost(host, team);
 
         // Start a coroutine to wait for the connection and deactivate the object
         StartCoroutine(WaitForConnectionAndDeactivate());
