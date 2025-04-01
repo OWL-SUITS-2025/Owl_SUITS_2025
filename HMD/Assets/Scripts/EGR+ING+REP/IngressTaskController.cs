@@ -1,15 +1,23 @@
+using Unity.VisualScripting;
+
+
 using UnityEngine;
 using TMPro;
 using System.Collections;
 
 public class IngressTaskController : MonoBehaviour
 {
+    [Header("UIA Panel Reference")]
+    public UIAPanelImage uiaPanelController;
+
+    [Header("TSS Data Handlers")]
     // Access TSS Data through other scripts
     public TELEMETRYDataHandler telemetryDataHandler;
     public DataRanges dataRanges;
     public UIADataHandler uiaDataHandler;
     public DCUDataHandler dcuDataHandler;
 
+    [Header("Progress Bar Game Objects")]
     // Progress Bar Game Objects
     public Transform ev1Background;
     public Transform ev1Foreground;
@@ -28,6 +36,7 @@ public class IngressTaskController : MonoBehaviour
     // Switch Location Game Object (This tells user where is the switch, either UIA or DCU)
     public TextMeshPro SwitchLocationText;
 
+    [Header("Colors for text and overlays")]
     public Color completedColor = Color.green;
     public Color incompleteColor = Color.red;
     public Color inProgressColor = Color.yellow;
@@ -35,16 +44,16 @@ public class IngressTaskController : MonoBehaviour
     private string[] tasks = new string[]
     {
         "Step 1: Connect UIA to DCU\nEV1 and EV2: connect UIA and DCU umbilical.",         // Task index 0
-        "Step 2: Power UIA ON\nUIA: EV-1, EV-2 EMU PWR – ON.",         // Task index 1
-        "Step 3: Configure DCU\nBOTH DCU: BATT – UMB.",         // Task index 2
-        "Step 4: Vent O2 Tanks\nUIA: OXYGEN O2 VENT – OPEN.",         // Task index 3
+        "Step 2: Power UIA ON\nUIA: EV-1, EV-2 EMU PWR ï¿½ ON.",         // Task index 1
+        "Step 3: Configure DCU\nBOTH DCU: BATT ï¿½ UMB.",         // Task index 2
+        "Step 4: Vent O2 Tanks\nUIA: OXYGEN O2 VENT ï¿½ OPEN.",         // Task index 3
         "Step 4: Vent O2 Tanks\nWait until both Primary and Secondary OXY tanks are < 10psi.",         // Task index 4
-        "Step 4: Vent O2 Tanks\nUIA: OXYGEN O2 VENT – CLOSE.",         // Task index 5
-        "Step 5: Empty Water Tanks\nBOTH DCU: PUMP – OPEN.",         // Task index 6
-        "Step 5: Empty Water Tanks\nUIA: EV-1, EV-2 WASTE WATER – OPEN.",         // Task index 7
+        "Step 4: Vent O2 Tanks\nUIA: OXYGEN O2 VENT ï¿½ CLOSE.",         // Task index 5
+        "Step 5: Empty Water Tanks\nBOTH DCU: PUMP ï¿½ OPEN.",         // Task index 6
+        "Step 5: Empty Water Tanks\nUIA: EV-1, EV-2 WASTE WATER ï¿½ OPEN.",         // Task index 7
         "Step 5: Empty Water Tanks\nWait until EV1 and EV2 Coolant tanks < 5%.",         // Task index 8
-        "Step 5: Empty Water Tanks\nUIA: EV-1, EV-2 WASTE WATER – CLOSE.",         // Task index 9
-        "Step 6: Disconnect UIA from DCU\nUIA: EV-1, EV-2 EMU PWR – OFF.",         // Task index 10
+        "Step 5: Empty Water Tanks\nUIA: EV-1, EV-2 WASTE WATER ï¿½ CLOSE.",         // Task index 9
+        "Step 6: Disconnect UIA from DCU\nUIA: EV-1, EV-2 EMU PWR ï¿½ OFF.",         // Task index 10
         "Step 6: Disconnect UIA from DCU\nDCU: EV1 and EV2 disconnect umbilical.",         // Task index 11
     };
 
@@ -59,6 +68,7 @@ public class IngressTaskController : MonoBehaviour
     private void Start()
     {
         UpdateTaskText();
+        uiaPanelController.PositionPanelToLeftOfUser();
     }
 
     private void Update()
@@ -78,6 +88,9 @@ public class IngressTaskController : MonoBehaviour
                 // Reset progress bar and text
                 ResetProgressBarAndText();
 
+                // Disable all overlays if we go backwards to 1st step (UIA Panel not needed here)
+                uiaPanelController.DeactivateAllOverlays();
+
                 // Check if EV-1 and EV-2 have connected UIA and DCU umbilical
                 // You can add the condition here based on the umbilical connection status
                 // For now, let's assume they are connected
@@ -88,13 +101,32 @@ public class IngressTaskController : MonoBehaviour
                 // Reset progress bar and text
                 ResetProgressBarAndText();
 
+                // Deactivate all overlays, then activate power ev1 (index 0) and power ev2 (index 1)
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(0, true); // Power EV1
+                uiaPanelController.SetOverlayState(1, true); // Power EV2
                 // Check if EV-1 and EV-2 EMU PWR switches are ON
                 bool isEVA1PowerOn = uiaDataHandler.GetPower("eva1");
                 bool isEVA2PowerOn = uiaDataHandler.GetPower("eva2");
 
+                // Check and change overlay colors if the user has completed the task or not
+                if (isEVA1PowerOn) {
+                    uiaPanelController.ChangeToCustomColor(0, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(0, incompleteColor);
+                }
+
+                if (isEVA2PowerOn) {
+                    uiaPanelController.ChangeToCustomColor(1, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(1, incompleteColor);
+                }
+
+
                 if (isEVA1PowerOn && isEVA2PowerOn)
                 {
                     progress = 1f;
+
                 }
 
                 // Update the status text
@@ -105,6 +137,10 @@ public class IngressTaskController : MonoBehaviour
             case 2: // Step 3: Configure DCU
                 // Reset progress bar and text
                 ResetProgressBarAndText();
+
+                // Deactivate all overlays, UIA panel not needed here
+                uiaPanelController.DeactivateAllOverlays();
+
 
                 // Check if BATT switch is UMB on both DCUs
                 bool isDCU1BattUMB = dcuDataHandler.GetBatt("eva1");
@@ -120,17 +156,23 @@ public class IngressTaskController : MonoBehaviour
                 taskStatusTextMeshPro.text = $"<color={GetColorName(isDCU1BattUMB)}>DCU1 BATT: {(isDCU1BattUMB ? "UMB" : "LOCAL")}</color>\n<color={GetColorName(isDCU2BattUMB)}>DCU2 BATT: {(isDCU2BattUMB ? "UMB" : "LOCAL")}</color>";
                 break;
 
-            case 3: // Step 4: Vent O2 Tanks - UIA: OXYGEN O2 VENT – OPEN
+            case 3: // Step 4: Vent O2 Tanks - UIA: OXYGEN O2 VENT ï¿½ OPEN
                 // Reset progress bar and text
                 ResetProgressBarAndText();
 
+                // Deactivate all overlays, then activate O2 vent (index 4) 
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(4, true); // O2 Vent
+
                 // Check if OXYGEN O2 VENT switch is OPEN
                 bool isOxygenO2VentOpen = uiaDataHandler.GetOxy_Vent();
+               
 
                 if (isOxygenO2VentOpen)
                 {
+                    uiaPanelController.ChangeToCustomColor(4, inProgressColor); // should stay yellow bc it will eventually hit green in next step
                     progress = 1f;
-                }
+                } 
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
@@ -140,6 +182,10 @@ public class IngressTaskController : MonoBehaviour
             case 4: // Step 4: Vent O2 Tanks - Wait until both Primary and Secondary OXY tanks are < 10psi
                 // Reset progress bar and text
                 ResetProgressBarAndText();
+
+                // Deactivate all overlays, then activate O2 vent (index 4) 
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(4, true); // O2 Vent
 
                 // Activate the progress bar
                 ActivateProgressBar();
@@ -182,15 +228,18 @@ public class IngressTaskController : MonoBehaviour
                     if (progressEV1 > 0.01f)
                     {
                         ev1Foreground.GetComponent<Renderer>().material.color = inProgressColor;
+                        uiaPanelController.ChangeToCustomColor(4, inProgressColor); // can possibly remove this
                     }
                     else
                     {
                         ev1Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                        uiaPanelController.ChangeToCustomColor(4, incompleteColor);
                     }
                 }
                 else
                 {
                     ev1Foreground.GetComponent<Renderer>().material.color = completedColor;
+                    uiaPanelController.ChangeToCustomColor(4, completedColor); 
                 }
 
                 if (progressEV2 < 1f)
@@ -198,15 +247,21 @@ public class IngressTaskController : MonoBehaviour
                     if (progressEV2 > 0.01f)
                     {
                         ev2Foreground.GetComponent<Renderer>().material.color = inProgressColor;
+                        uiaPanelController.ChangeToCustomColor(4, inProgressColor); // can possibly remove this
+
                     }
                     else
                     {
                         ev2Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                        uiaPanelController.ChangeToCustomColor(4, incompleteColor);
+
                     }
                 }
                 else
                 {
                     ev2Foreground.GetComponent<Renderer>().material.color = completedColor;
+                    uiaPanelController.ChangeToCustomColor(4, completedColor);
+
                 }
 
                 if (eva1MaxPressure <= 10f && eva2MaxPressure <= 10f)
@@ -215,16 +270,24 @@ public class IngressTaskController : MonoBehaviour
                 }
                 break;
 
-            case 5: // Step 4: Vent O2 Tanks - UIA: OXYGEN O2 VENT – CLOSE
+            case 5: // Step 4: Vent O2 Tanks - UIA: OXYGEN O2 VENT ï¿½ CLOSE
                 // Reset progress bar and text
                 ResetProgressBarAndText();
+
+                // Deactivate all overlays, then activate O2 vent (index 4) 
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(4, true); // O2 Vent
 
                 // Check if OXYGEN O2 VENT switch is CLOSE
                 bool isOxygenO2VentClose = !uiaDataHandler.GetOxy_Vent();
 
                 if (isOxygenO2VentClose)
                 {
+                    uiaPanelController.ChangeToCustomColor(4, completedColor);
                     progress = 1f;
+                } else {
+                    uiaPanelController.ChangeToCustomColor(4, incompleteColor);
+
                 }
 
                 // Update the status text
@@ -232,9 +295,12 @@ public class IngressTaskController : MonoBehaviour
                 taskStatusTextMeshPro.text = $"OXYGEN O2 VENT: {(isOxygenO2VentClose ? "CLOSED" : "OPEN")}";
                 break;
 
-            case 6: // Step 5: Empty Water Tanks - BOTH DCU: PUMP – OPEN
+            case 6: // Step 5: Empty Water Tanks - BOTH DCU: PUMP ï¿½ OPEN
                 // Reset progress bar and text
                 ResetProgressBarAndText();
+
+                // Deactivate all overlays, this task doesn't involve UIA overlay 
+                uiaPanelController.DeactivateAllOverlays();
 
                 // Check if PUMP switch is OPEN on both DCUs
                 bool isDCU1PumpOpen = dcuDataHandler.GetPump("eva1");
@@ -250,14 +316,27 @@ public class IngressTaskController : MonoBehaviour
                 taskStatusTextMeshPro.text = $"<color={GetColorName(isDCU1PumpOpen)}>DCU1 PUMP: {(isDCU1PumpOpen ? "OPEN" : "CLOSED")}</color>\n<color={GetColorName(isDCU2PumpOpen)}>DCU2 PUMP: {(isDCU2PumpOpen ? "OPEN" : "CLOSED")}</color>";
                 break;
 
-            case 7: // Step 5: Empty Water Tanks - UIA: EV-1, EV-2 WASTE WATER – OPEN
+            case 7: // Step 5: Empty Water Tanks - UIA: EV-1, EV-2 WASTE WATER ï¿½ OPEN
                 // Reset progress bar and text
                 ResetProgressBarAndText();
+
+                // Deactivate all overlays, then activate water waste vents (index 5 and 6) 
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(5, true); // water ev1 waste Vent
+                uiaPanelController.SetOverlayState(6, true); // water ev2 waste Vent
 
                 // Check if EV-1 and EV-2 WASTE WATER switches are OPEN
                 bool isEVA1WasteWaterOpen = uiaDataHandler.GetWater_Waste("eva1");
                 bool isEVA2WasteWaterOpen = uiaDataHandler.GetWater_Waste("eva2");
 
+                // Check and change overlay colors if the user has completed the task or not
+                if (isEVA1WasteWaterOpen) {
+                    uiaPanelController.ChangeToCustomColor(5, inProgressColor);
+                }
+
+                if (isEVA2WasteWaterOpen) {
+                    uiaPanelController.ChangeToCustomColor(6, inProgressColor);
+                } 
                 if (isEVA1WasteWaterOpen && isEVA2WasteWaterOpen)
                 {
                     progress = 1f;
@@ -271,6 +350,11 @@ public class IngressTaskController : MonoBehaviour
             case 8: // Step 5: Empty Water Tanks - Wait until EV1 and EV2 Coolant tanks < 5%
                 // Reset progress bar and text
                 ResetProgressBarAndText();
+
+                // Deactivate all overlays, then activate water waste vents (index 5 and 6) 
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(5, true); // water ev1 waste Vent
+                uiaPanelController.SetOverlayState(6, true); // water ev2 waste Vent
 
                 // Activate the progress bar
                 ActivateProgressBar();
@@ -292,15 +376,21 @@ public class IngressTaskController : MonoBehaviour
                     if (progressEV1case8 > 0.01f)
                     {
                         ev1Foreground.GetComponent<Renderer>().material.color = inProgressColor;
+                        uiaPanelController.ChangeToCustomColor(5, inProgressColor);
+                        
                     }
                     else
                     {
                         ev1Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                        uiaPanelController.ChangeToCustomColor(5, incompleteColor);
+
                     }
                 }
                 else
                 {
                     ev1Foreground.GetComponent<Renderer>().material.color = completedColor;
+                    uiaPanelController.ChangeToCustomColor(5, completedColor);
+
                 }
 
                 if (progressEV2case8 < 1f)
@@ -308,15 +398,21 @@ public class IngressTaskController : MonoBehaviour
                     if (progressEV2case8 > 0.01f)
                     {
                         ev2Foreground.GetComponent<Renderer>().material.color = inProgressColor;
+                        uiaPanelController.ChangeToCustomColor(6, inProgressColor);
+
                     }
                     else
                     {
                         ev2Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                        uiaPanelController.ChangeToCustomColor(6, incompleteColor);
+                    
                     }
                 }
                 else
                 {
                     ev2Foreground.GetComponent<Renderer>().material.color = completedColor;
+                    uiaPanelController.ChangeToCustomColor(6, completedColor);
+
                 }
 
                 if (eva1CoolantMl <= 5f && eva2CoolantMl <= 5f)
@@ -325,13 +421,32 @@ public class IngressTaskController : MonoBehaviour
                 }
                 break;
 
-            case 9: // Step 5: Empty Water Tanks - UIA: EV-1, EV-2 WASTE WATER – CLOSE
+            case 9: // Step 5: Empty Water Tanks - UIA: EV-1, EV-2 WASTE WATER ï¿½ CLOSE
                 // Reset progress bar and text
                 ResetProgressBarAndText();
+
+                // Deactivate all overlays, then activate water waste vents (index 5 and 6) 
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(5, true); // water ev1 waste Vent
+                uiaPanelController.SetOverlayState(6, true); // water ev2 waste Vent
+
 
                 // Check if EV-1 and EV-2 WASTE WATER switches are CLOSE
                 bool isEVA1WasteWaterClose = !uiaDataHandler.GetWater_Waste("eva1");
                 bool isEVA2WasteWaterClose = !uiaDataHandler.GetWater_Waste("eva2");
+
+                // Check and change overlay colors if the user has completed the task or not
+                if (isEVA1WasteWaterClose) {
+                    uiaPanelController.ChangeToCustomColor(5, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(5, incompleteColor);
+                }
+                if (isEVA2WasteWaterClose) {
+                    uiaPanelController.ChangeToCustomColor(6, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(6, incompleteColor);
+                }
+
 
                 if (isEVA1WasteWaterClose && isEVA2WasteWaterClose)
                 {
@@ -343,13 +458,31 @@ public class IngressTaskController : MonoBehaviour
                 taskStatusTextMeshPro.text = $"<color={GetColorName(isEVA1WasteWaterClose)}>EV-1 WASTE WATER: {(isEVA1WasteWaterClose ? "CLOSED" : "OPEN")}</color>\n<color={GetColorName(isEVA2WasteWaterClose)}>EV-2 WASTE WATER: {(isEVA2WasteWaterClose ? "CLOSED" : "OPEN")}</color>";
                 break;
 
-            case 10: // Step 6: Disconnect UIA from DCU - UIA: EV-1, EV-2 EMU PWR – OFF
+            case 10: // Step 6: Disconnect UIA from DCU - UIA: EV-1, EV-2 EMU PWR ï¿½ OFF
                 // Reset progress bar and text
                 ResetProgressBarAndText();
+
+                // Deactivate all overlays, then activate power ev1 (index 0) and power ev2 (index 1)
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(0, true); // Power EV1
+                uiaPanelController.SetOverlayState(1, true); // Power EV2
 
                 // Check if EV-1 and EV-2 EMU PWR switches are OFF
                 bool isEVA1PowerOff = !uiaDataHandler.GetPower("eva1");
                 bool isEVA2PowerOff = !uiaDataHandler.GetPower("eva2");
+
+                // Check and change overlay colors if the user has completed the task or not
+                if (isEVA1PowerOff) {
+                    uiaPanelController.ChangeToCustomColor(0, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(0, incompleteColor);
+                }
+
+                if (isEVA2PowerOff) {
+                    uiaPanelController.ChangeToCustomColor(1, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(1, incompleteColor);
+                }
 
                 if (isEVA1PowerOff && isEVA2PowerOff)
                 {
@@ -365,6 +498,11 @@ public class IngressTaskController : MonoBehaviour
                 // Reset progress bar and text
                 ResetProgressBarAndText();
 
+
+                // Deactivate all overlays, this task doesn't require UIA panel
+                uiaPanelController.DeactivateAllOverlays();
+                
+
                 // Check if EV1 and EV2 have disconnected UIA and DCU umbilical
                 // You can add the condition here based on the umbilical disconnection status
                 // For now, let's assume they are disconnected
@@ -374,6 +512,9 @@ public class IngressTaskController : MonoBehaviour
             default:
                 // Reset progress bar and text for other cases
                 ResetProgressBarAndText();
+                // Deactivate all overlays for other cases
+                uiaPanelController.DeactivateAllOverlays();
+                
                 break;
         }
 
