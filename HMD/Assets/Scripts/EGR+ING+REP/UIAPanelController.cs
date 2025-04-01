@@ -1,5 +1,6 @@
 using MixedReality.Toolkit;
 using MixedReality.Toolkit.SpatialManipulation;
+using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +17,7 @@ public class UIAPanelImage : MonoBehaviour
     public GameObject O2Vent;
     public GameObject H2OWasteEV1;
     public GameObject H2OWasteEV2;
+    // public RawImage testImage;
 
     // Array to hold all overlay objects
     private GameObject[] overlays;
@@ -29,8 +31,6 @@ public class UIAPanelImage : MonoBehaviour
     public float heightOffset = 0.0f;
     
     
-    // Reference to the ObjectManipulator component (for MRTK3)
-    private ObjectManipulator objectManipulator;
     
     // Reference to the camera (user's head)
     private Camera mainCamera;
@@ -38,7 +38,6 @@ public class UIAPanelImage : MonoBehaviour
     void Start()
     {
         // Get references to components
-        objectManipulator = GetComponent<ObjectManipulator>();
         mainCamera = Camera.main;
         
         // Since the panel is floating and not following user, we need to set its position manually
@@ -47,14 +46,14 @@ public class UIAPanelImage : MonoBehaviour
         
         overlays = new GameObject[] { PWREV1, PWREV2, O2EV1, O2EV2, O2Vent, H2OWasteEV1, H2OWasteEV2 };
 
-
         // Hide all overlays initially
-        foreach (GameObject overlay in overlays)
-        {
-            overlay.SetActive(false);
+        DeactivateAllOverlays();
+
+        // Change all overlay colors to red (incomplete by default)
+        for (int i = 0; i < overlays.Length; i++) {
+            ChangeToCustomColor(i, Color.red);
         }
-        overlays[0].SetActive(true); // Show the first overlay by default
-        ToggleOverlay(5); //  test function
+        
     }
     
     // Position the panel to the left of the user at the specified distance
@@ -75,10 +74,6 @@ public class UIAPanelImage : MonoBehaviour
         // Set the panel position
         transform.position = panelPosition;
 
-
-        Debug.Log("Panel Position: " + panelPosition);
-        Debug.Log("User Position: " + userPosition);
-        Debug.LogError("UIA Panel Spawned!");
         // Make the panel face the user
         transform.LookAt(userPosition);
 
@@ -94,6 +89,8 @@ public class UIAPanelImage : MonoBehaviour
         {
             overlays[index].SetActive(!overlays[index].activeSelf); 
         }
+
+        
     }
     
     // Set a specific overlay's state
@@ -112,5 +109,20 @@ public class UIAPanelImage : MonoBehaviour
         {
             overlay.SetActive(false);
         }
+    }
+
+
+   // Methods to change overlay colors 
+    public void ResetToWhite(int index)
+    {
+        RawImage image = overlays[index].GetComponentInChildren<RawImage>();
+        image.color = Color.white;
+    }
+    
+    // Unity colors
+    public void ChangeToCustomColor(int index, Color newColor)
+    {
+        RawImage image = overlays[index].GetComponentInChildren<RawImage>();
+        image.color = newColor;
     }
 }

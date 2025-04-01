@@ -9,13 +9,15 @@ public class IngressTaskController : MonoBehaviour
 {
     [Header("UIA Panel Reference")]
     public UIAPanelImage uiaPanelController;
+
+    [Header("TSS Data Handlers")]
     // Access TSS Data through other scripts
     public TELEMETRYDataHandler telemetryDataHandler;
     public DataRanges dataRanges;
     public UIADataHandler uiaDataHandler;
     public DCUDataHandler dcuDataHandler;
 
-
+    [Header("Progress Bar Game Objects")]
     // Progress Bar Game Objects
     public Transform ev1Background;
     public Transform ev1Foreground;
@@ -34,7 +36,7 @@ public class IngressTaskController : MonoBehaviour
     // Switch Location Game Object (This tells user where is the switch, either UIA or DCU)
     public TextMeshPro SwitchLocationText;
 
-    
+    [Header("Colors for text and overlays")]
     public Color completedColor = Color.green;
     public Color incompleteColor = Color.red;
     public Color inProgressColor = Color.yellow;
@@ -103,16 +105,28 @@ public class IngressTaskController : MonoBehaviour
                 uiaPanelController.DeactivateAllOverlays();
                 uiaPanelController.SetOverlayState(0, true); // Power EV1
                 uiaPanelController.SetOverlayState(1, true); // Power EV2
-
                 // Check if EV-1 and EV-2 EMU PWR switches are ON
                 bool isEVA1PowerOn = uiaDataHandler.GetPower("eva1");
                 bool isEVA2PowerOn = uiaDataHandler.GetPower("eva2");
 
-                // uiaPanelController.ToggleOverlay(4); // test
-                
+                // Check and change overlay colors if the user has completed the task or not
+                if (isEVA1PowerOn) {
+                    uiaPanelController.ChangeToCustomColor(0, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(0, incompleteColor);
+                }
+
+                if (isEVA2PowerOn) {
+                    uiaPanelController.ChangeToCustomColor(1, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(1, incompleteColor);
+                }
+
+
                 if (isEVA1PowerOn && isEVA2PowerOn)
                 {
                     progress = 1f;
+
                 }
 
                 // Update the status text
@@ -152,11 +166,13 @@ public class IngressTaskController : MonoBehaviour
 
                 // Check if OXYGEN O2 VENT switch is OPEN
                 bool isOxygenO2VentOpen = uiaDataHandler.GetOxy_Vent();
+               
 
                 if (isOxygenO2VentOpen)
                 {
+                    uiaPanelController.ChangeToCustomColor(4, inProgressColor); // should stay yellow bc it will eventually hit green in next step
                     progress = 1f;
-                }
+                } 
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
@@ -212,15 +228,18 @@ public class IngressTaskController : MonoBehaviour
                     if (progressEV1 > 0.01f)
                     {
                         ev1Foreground.GetComponent<Renderer>().material.color = inProgressColor;
+                        uiaPanelController.ChangeToCustomColor(4, inProgressColor); // can possibly remove this
                     }
                     else
                     {
                         ev1Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                        uiaPanelController.ChangeToCustomColor(4, incompleteColor);
                     }
                 }
                 else
                 {
                     ev1Foreground.GetComponent<Renderer>().material.color = completedColor;
+                    uiaPanelController.ChangeToCustomColor(4, completedColor); 
                 }
 
                 if (progressEV2 < 1f)
@@ -228,15 +247,21 @@ public class IngressTaskController : MonoBehaviour
                     if (progressEV2 > 0.01f)
                     {
                         ev2Foreground.GetComponent<Renderer>().material.color = inProgressColor;
+                        uiaPanelController.ChangeToCustomColor(4, inProgressColor); // can possibly remove this
+
                     }
                     else
                     {
                         ev2Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                        uiaPanelController.ChangeToCustomColor(4, incompleteColor);
+
                     }
                 }
                 else
                 {
                     ev2Foreground.GetComponent<Renderer>().material.color = completedColor;
+                    uiaPanelController.ChangeToCustomColor(4, completedColor);
+
                 }
 
                 if (eva1MaxPressure <= 10f && eva2MaxPressure <= 10f)
@@ -258,7 +283,11 @@ public class IngressTaskController : MonoBehaviour
 
                 if (isOxygenO2VentClose)
                 {
+                    uiaPanelController.ChangeToCustomColor(4, completedColor);
                     progress = 1f;
+                } else {
+                    uiaPanelController.ChangeToCustomColor(4, incompleteColor);
+
                 }
 
                 // Update the status text
@@ -270,10 +299,8 @@ public class IngressTaskController : MonoBehaviour
                 // Reset progress bar and text
                 ResetProgressBarAndText();
 
-                // Deactivate all overlays, then activate water waste vents (index 5 and 6) 
+                // Deactivate all overlays, this task doesn't involve UIA overlay 
                 uiaPanelController.DeactivateAllOverlays();
-                uiaPanelController.SetOverlayState(5, true); // water ev1 waste Vent
-                uiaPanelController.SetOverlayState(6, true); // water ev2 waste Vent
 
                 // Check if PUMP switch is OPEN on both DCUs
                 bool isDCU1PumpOpen = dcuDataHandler.GetPump("eva1");
@@ -302,6 +329,14 @@ public class IngressTaskController : MonoBehaviour
                 bool isEVA1WasteWaterOpen = uiaDataHandler.GetWater_Waste("eva1");
                 bool isEVA2WasteWaterOpen = uiaDataHandler.GetWater_Waste("eva2");
 
+                // Check and change overlay colors if the user has completed the task or not
+                if (isEVA1WasteWaterOpen) {
+                    uiaPanelController.ChangeToCustomColor(5, inProgressColor);
+                }
+
+                if (isEVA2WasteWaterOpen) {
+                    uiaPanelController.ChangeToCustomColor(6, inProgressColor);
+                } 
                 if (isEVA1WasteWaterOpen && isEVA2WasteWaterOpen)
                 {
                     progress = 1f;
@@ -341,15 +376,21 @@ public class IngressTaskController : MonoBehaviour
                     if (progressEV1case8 > 0.01f)
                     {
                         ev1Foreground.GetComponent<Renderer>().material.color = inProgressColor;
+                        uiaPanelController.ChangeToCustomColor(5, inProgressColor);
+                        
                     }
                     else
                     {
                         ev1Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                        uiaPanelController.ChangeToCustomColor(5, incompleteColor);
+
                     }
                 }
                 else
                 {
                     ev1Foreground.GetComponent<Renderer>().material.color = completedColor;
+                    uiaPanelController.ChangeToCustomColor(5, completedColor);
+
                 }
 
                 if (progressEV2case8 < 1f)
@@ -357,15 +398,21 @@ public class IngressTaskController : MonoBehaviour
                     if (progressEV2case8 > 0.01f)
                     {
                         ev2Foreground.GetComponent<Renderer>().material.color = inProgressColor;
+                        uiaPanelController.ChangeToCustomColor(6, inProgressColor);
+
                     }
                     else
                     {
                         ev2Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                        uiaPanelController.ChangeToCustomColor(6, incompleteColor);
+                    
                     }
                 }
                 else
                 {
                     ev2Foreground.GetComponent<Renderer>().material.color = completedColor;
+                    uiaPanelController.ChangeToCustomColor(6, completedColor);
+
                 }
 
                 if (eva1CoolantMl <= 5f && eva2CoolantMl <= 5f)
@@ -387,6 +434,19 @@ public class IngressTaskController : MonoBehaviour
                 // Check if EV-1 and EV-2 WASTE WATER switches are CLOSE
                 bool isEVA1WasteWaterClose = !uiaDataHandler.GetWater_Waste("eva1");
                 bool isEVA2WasteWaterClose = !uiaDataHandler.GetWater_Waste("eva2");
+
+                // Check and change overlay colors if the user has completed the task or not
+                if (isEVA1WasteWaterClose) {
+                    uiaPanelController.ChangeToCustomColor(5, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(5, incompleteColor);
+                }
+                if (isEVA2WasteWaterClose) {
+                    uiaPanelController.ChangeToCustomColor(6, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(6, incompleteColor);
+                }
+
 
                 if (isEVA1WasteWaterClose && isEVA2WasteWaterClose)
                 {
@@ -411,6 +471,19 @@ public class IngressTaskController : MonoBehaviour
                 bool isEVA1PowerOff = !uiaDataHandler.GetPower("eva1");
                 bool isEVA2PowerOff = !uiaDataHandler.GetPower("eva2");
 
+                // Check and change overlay colors if the user has completed the task or not
+                if (isEVA1PowerOff) {
+                    uiaPanelController.ChangeToCustomColor(0, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(0, incompleteColor);
+                }
+
+                if (isEVA2PowerOff) {
+                    uiaPanelController.ChangeToCustomColor(1, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(1, incompleteColor);
+                }
+
                 if (isEVA1PowerOff && isEVA2PowerOff)
                 {
                     progress = 1f;
@@ -426,10 +499,9 @@ public class IngressTaskController : MonoBehaviour
                 ResetProgressBarAndText();
 
 
-                // Deactivate all overlays, then activate power ev1 (index 0) and power ev2 (index 1)
+                // Deactivate all overlays, this task doesn't require UIA panel
                 uiaPanelController.DeactivateAllOverlays();
-                uiaPanelController.SetOverlayState(0, true); // Power EV1
-                uiaPanelController.SetOverlayState(1, true); // Power EV2
+                
 
                 // Check if EV1 and EV2 have disconnected UIA and DCU umbilical
                 // You can add the condition here based on the umbilical disconnection status
