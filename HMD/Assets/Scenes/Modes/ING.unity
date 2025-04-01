@@ -19657,7 +19657,7 @@ GameObject:
   - component: {fileID: 1200550737}
   - component: {fileID: 1200550736}
   m_Layer: 0
-  m_Name: ToolHandMenu
+  m_Name: IngressHandMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19676,7 +19676,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1684364663}
   - {fileID: 970481580}
   m_Father: {fileID: 457885948}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -29115,56 +29114,6 @@ Transform:
   - {fileID: 588275044}
   m_Father: {fileID: 1665747929}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1684364662
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1684364663}
-  - component: {fileID: 1684364664}
-  m_Layer: 0
-  m_Name: ToolMenuHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1684364663
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1684364662}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.4300025, y: -1.04, z: 0.30902863}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1200550735}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1684364664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1684364662}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a4c7c8d46c05aa428a3bec21728f939, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  egressHUD: {fileID: 0}
-  geoHUD: {fileID: 0}
-  navigationHUD: {fileID: 0}
-  ingressHUD: {fileID: 457885947}
-  repairHUD: {fileID: 0}
-  modeTextMeshPro: {fileID: 0}
 --- !u!1 &1691260610
 GameObject:
   m_ObjectHideFlags: 0
