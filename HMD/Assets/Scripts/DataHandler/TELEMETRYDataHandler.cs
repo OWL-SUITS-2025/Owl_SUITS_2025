@@ -495,4 +495,9 @@ public class TELEMETRYDataHandler : MonoBehaviour
             return 0f; // Or another default value
         }
     }
+    public float GetEVATime()
+    {
+        // Return the EVA time from the telemetry data
+        return telemetryWrapper.telemetry.eva_time;
+    }
 }
