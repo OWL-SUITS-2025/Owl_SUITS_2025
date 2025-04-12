@@ -2,14 +2,21 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 
-public class TaskController : MonoBehaviour
+public class EgressTaskController : MonoBehaviour
 {
+
+    [Header("UIA Panel Reference")]
+    public UIAPanelImage uiaPanelController;
+
+    [Header("TSS Data Handlers")]
+
     // Access TSS Data through other scripts
     public TELEMETRYDataHandler telemetryDataHandler;
     public DataRanges dataRanges;
     public UIADataHandler uiaDataHandler;
     public DCUDataHandler dcuDataHandler;
 
+    [Header("Current Step Progress Bar Game Objects")]
     // Progress Bar Game Objects
     public Transform ev1Background;
     public Transform ev1Foreground;
@@ -18,11 +25,13 @@ public class TaskController : MonoBehaviour
     public TextMeshPro ev1ProgressTextMeshPro;
     public TextMeshPro ev2ProgressTextMeshPro;
 
+    [Header("Overall Progress Bar Game Objects")]
     // Overall Progress Bar Game Object
     public Transform overallBackgroundBar;
     public Transform overallForegroundBar;
     public TextMeshPro overallProgressTextMeshPro;
 
+    [Header("Task Panel Misc Objects")]
     // Progress Text Game Objects
     public TextMeshPro taskStatusTextMeshPro;
 
@@ -33,7 +42,8 @@ public class TaskController : MonoBehaviour
     // Switch Location Game Object (This tells user where is the switch, either
     // UIA or DCU)
     public TextMeshPro SwitchLocationText;
-
+    
+    [Header("Progress Colors for text and overlays")]
     public Color completedColor = Color.green;
     public Color incompleteColor = Color.red;
     public Color inProgressColor = Color.yellow;
@@ -85,6 +95,8 @@ public class TaskController : MonoBehaviour
         UpdateTaskText();
         UpdateOverallProgressBar();
         UpdateOverallProgressText();
+        uiaPanelController.PositionPanelToLeftOfUser();
+
     }
 
     private void Update()
@@ -131,10 +143,29 @@ public class TaskController : MonoBehaviour
 
         switch (currentTaskIndex)
         {
+            case 0: // Step 1: Connect UIA to DCU
+                // Ready progress bar and text
+                ResetProgressBarAndText();
+
+
+                // Disable all overlays if we go backwards to 1st step (UIA Panel not needed here)
+                uiaPanelController.DeactivateAllOverlays();
+
+                // Check if EV-1 and EV-2 have connected UIA and DCU umbilical
+                // You can add the condition here based on the umbilical connection status
+                // For now, let's assume they are connected
+                
+                // TODO implement UIA and DCU umb check from EgressTaskController.cs
+                progress = 1f;
+                break;
             case 1: // Step 2: Power ON and Configure DCU
                 // Reset progress bar and text
                 ResetProgressBarAndText();
-
+                // Deactivate all overlays, activate ev1 power (index 0) and ev2 power (index 1)
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(0, true); // Power EV1
+                uiaPanelController.SetOverlayState(1, true); // Power EV2
+                
                 // Check if EV-1 and EV-2 PWR switch is ON and BATT switch is UMB
                 bool isEVA1PowerOn = uiaDataHandler.GetPower("eva1");
                 bool isEVA2PowerOn = uiaDataHandler.GetPower("eva2");
@@ -148,13 +179,20 @@ public class TaskController : MonoBehaviour
 
                 // Update the status text with colored lines based on switch states
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"<color={GetColorName(isEVA1PowerOn)}>EV-1 PWR: {(isEVA1PowerOn ? "ON" : "OFF")}</color>\n<color={GetColorName(isEVA2PowerOn)}>EV-2 PWR: {(isEVA2PowerOn ? "ON" : "OFF")}</color>\n<color={GetColorName(isDCU1BattUMB)}>DCU1 BATT: {(isDCU1BattUMB ? "ON" : "OFF")}</color>\n<color={GetColorName(isDCU2BattUMB)}>DCU2 BATT: {(isDCU2BattUMB ? "ON" : "OFF")}</color>";
+                taskStatusTextMeshPro.text = $"<color={GetColorName(isEVA1PowerOn)}>EV-1 EMU PWR: {(isEVA1PowerOn ? "ON" : "OFF")}</color>\n<color={GetColorName(isEVA2PowerOn)}>EV-2 EMU PWR: {(isEVA2PowerOn ? "ON" : "OFF")}</color>\n<color={GetColorName(isDCU1BattUMB)}>DCU1 BATT: {(isDCU1BattUMB ? "ON" : "OFF")}</color>\n<color={GetColorName(isDCU2BattUMB)}>DCU2 BATT: {(isDCU2BattUMB ? "ON" : "OFF")}</color>";
                 break;
 
             case 2: // Step 3: Start Depress
+                // UIA: DEPRESS PUMP PWR switch to ON."
+                
+
                 // Reset progress bar and text
                 ResetProgressBarAndText();
 
+                // Deactivate all overlays, activate depress pump (not in Unity yet)
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(0, true); // Power EV1
+                uiaPanelController.SetOverlayState(1, true); // Power EV2
                 // Check if DEPRESS PUMP PWR switch is ON
                 bool isDepressPumpPwrOn = uiaDataHandler.GetDepress();
 

@@ -94,6 +94,8 @@ public class IngressTaskController : MonoBehaviour
                 // Check if EV-1 and EV-2 have connected UIA and DCU umbilical
                 // You can add the condition here based on the umbilical connection status
                 // For now, let's assume they are connected
+                
+                // TODO implement UIA and DCU umb check from EgressTaskController.cs
                 progress = 1f;
                 break;
 
