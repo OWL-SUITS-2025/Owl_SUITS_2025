@@ -189,10 +189,10 @@ public class EgressTaskController : MonoBehaviour
                 // Reset progress bar and text
                 ResetProgressBarAndText();
 
-                // Deactivate all overlays, activate depress pump (not in Unity yet)
+                // Deactivate all overlays, activate depress pump (index 7)
                 uiaPanelController.DeactivateAllOverlays();
-                uiaPanelController.SetOverlayState(0, true); // Power EV1
-                uiaPanelController.SetOverlayState(1, true); // Power EV2
+                uiaPanelController.SetOverlayState(7, true); // depress pump
+
                 // Check if DEPRESS PUMP PWR switch is ON
                 bool isDepressPumpPwrOn = uiaDataHandler.GetDepress();
 
@@ -203,12 +203,17 @@ public class EgressTaskController : MonoBehaviour
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"DEPRESS PUMP PWR: {(isDepressPumpPwrOn ? "ON" : "OFF")}";
+                // Color format:
+                // <color=green>ON</color> or <color=red>OFF</color>
+                taskStatusTextMeshPro.text = $"<color={GetColorName(isDepressPumpPwrOn)}>DEPRESS PUMP PWR: {(isDepressPumpPwrOn ? "ON" : "OFF")}</color>";
                 break;
 
             case 3: // Step 4: Prepare O2 Tanks - UIA: OXYGEN O2 VENT switch to OPEN
                 // Reset progress bar and text
                 ResetProgressBarAndText();
+                // Deactivate all overlays, activate oxygen vent (index 4)
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(4, true); // oxygen vent
 
                 // Check if OXYGEN O2 VENT switch is OPEN
                 bool isOxygenO2VentOpen = uiaDataHandler.GetOxy_Vent();
@@ -220,12 +225,16 @@ public class EgressTaskController : MonoBehaviour
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"OXYGEN O2 VENT: {(isOxygenO2VentOpen ? "OPEN" : "CLOSED")}";
+                taskStatusTextMeshPro.text = $"<color={GetColorName(isOxygenO2VentOpen)}>OXYGEN O2 VENT: {(isOxygenO2VentOpen ? "OPEN" : "CLOSED")}</color>";
                 break;
 
             case 4: // Step 4: Prepare O2 Tanks - Wait until Primary and Secondary OXY tanks < 10psi
                     // Reset progress bar and text
                 ResetProgressBarAndText();
+
+                // Deactivate all overlays, activate oxygen vent (index 4)
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(4, true); // oxygen vent
 
                 // Activate the progress bar
                 ActivateProgressBar();
@@ -271,15 +280,20 @@ public class EgressTaskController : MonoBehaviour
                     if (progressEV1 > 0.01f)
                     {
                         ev1Foreground.GetComponent<Renderer>().material.color = inProgressColor;
+                        uiaPanelController.ChangeToCustomColor(4, inProgressColor); // can possibly remove this
                     }
                     else
                     {
                         ev1Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                        uiaPanelController.ChangeToCustomColor(4, incompleteColor);
+
                     }
                 }
                 else
                 {
                     ev1Foreground.GetComponent<Renderer>().material.color = completedColor;
+                    uiaPanelController.ChangeToCustomColor(4, completedColor); 
+
                 }
 
                 if (progressEV2 < 1f)
@@ -287,15 +301,20 @@ public class EgressTaskController : MonoBehaviour
                     if (progressEV2 > 0.01f)
                     {
                         ev2Foreground.GetComponent<Renderer>().material.color = inProgressColor;
+                        uiaPanelController.ChangeToCustomColor(4, inProgressColor); // can possibly remove this
                     }
                     else
                     {
                         ev2Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                        uiaPanelController.ChangeToCustomColor(4, incompleteColor);
+
                     }
                 }
                 else
                 {
                     ev2Foreground.GetComponent<Renderer>().material.color = completedColor;
+                    uiaPanelController.ChangeToCustomColor(4, completedColor);
+
                 }
 
                 if (eva1MaxPressure <= 10f && eva2MaxPressure <= 10f)
@@ -308,12 +327,19 @@ public class EgressTaskController : MonoBehaviour
                     // Reset progress bar and text
                 ResetProgressBarAndText();
 
+                // Deactivate all overlays, activate oxygen vent (index 4)
+                uiaPanelController.DeactivateAllOverlays();
+                uiaPanelController.SetOverlayState(4, true); // oxygen vent
+
                 // Check if OXYGEN O2 VENT switch is CLOSE
                 bool isOxygenO2VentClose = !uiaDataHandler.GetOxy_Vent();
 
                 if (isOxygenO2VentClose)
                 {
                     progress = 1f;
+                    uiaPanelController.ChangeToCustomColor(4, completedColor);
+                } else {
+                    uiaPanelController.ChangeToCustomColor(4, incompleteColor);
                 }
 
                 // Update the status text

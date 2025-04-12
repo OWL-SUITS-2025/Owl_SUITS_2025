@@ -178,7 +178,7 @@ public class IngressTaskController : MonoBehaviour
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"OXYGEN O2 VENT: {(isOxygenO2VentOpen ? "OPEN" : "CLOSED")}";
+                taskStatusTextMeshPro.text = $"<color={GetColorName(isOxygenO2VentOpen)}>OXYGEN O2 VENT: {(isOxygenO2VentOpen ? "OPEN" : "CLOSED")}</color>";
                 break;
 
             case 4: // Step 4: Vent O2 Tanks - Wait until both Primary and Secondary OXY tanks are < 10psi
@@ -294,7 +294,7 @@ public class IngressTaskController : MonoBehaviour
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"OXYGEN O2 VENT: {(isOxygenO2VentClose ? "CLOSED" : "OPEN")}";
+                taskStatusTextMeshPro.text = $"<color={GetColorName(isOxygenO2VentClose)}>OXYGEN O2 VENT: {(isOxygenO2VentClose ? "CLOSED" : "OPEN")}</color>";
                 break;
 
             case 6: // Step 5: Empty Water Tanks - BOTH DCU: PUMP � OPEN
