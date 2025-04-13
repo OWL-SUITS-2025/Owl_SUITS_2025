@@ -19,8 +19,8 @@ public class DataRanges : MonoBehaviour
 
     // -1 means no nominal value is provided
     public DataRange batt_time_left = new DataRange(3600, -1, 10800);
-    public DataRange oxy_pri_storage = new DataRange(20, -1, 100);
-    public DataRange oxy_sec_storage = new DataRange(20, -1, 100);
+    public DataRange oxy_pri_storage = new DataRange(0, -1, 100);
+    public DataRange oxy_sec_storage = new DataRange(0, -1, 100);
     public DataRange oxy_pri_pressure = new DataRange(600, -1, 3000);
     public DataRange oxy_sec_pressure = new DataRange(600, -1, 3000);
     public DataRange oxy_time_left = new DataRange(3600, -1, 21600);

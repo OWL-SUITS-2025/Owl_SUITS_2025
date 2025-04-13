@@ -55,6 +55,7 @@ public class IngressTaskController : MonoBehaviour
         "Step 5: Empty Water Tanks\nUIA: EV-1, EV-2 WASTE WATER � CLOSE.",         // Task index 9
         "Step 6: Disconnect UIA from DCU\nUIA: EV-1, EV-2 EMU PWR � OFF.",         // Task index 10
         "Step 6: Disconnect UIA from DCU\nDCU: EV1 and EV2 disconnect umbilical.",         // Task index 11
+        "End: Congratulations!\n You have completed the ingress task.",         // Task index 12
     };
 
     private int currentTaskIndex = 0;
@@ -69,6 +70,11 @@ public class IngressTaskController : MonoBehaviour
     {
         UpdateTaskText();
         uiaPanelController.PositionPanelToLeftOfUser();
+        // Should hopefully fix array OOB error that happens when
+        // Switching from co
+        // mplete Egress (max step index=30) to new Ingress (max step index=12)
+        // 30 > 12 -> array out of bounds error!
+        currentTaskIndex = 0;
     }
 
     private void Update()
@@ -94,6 +100,11 @@ public class IngressTaskController : MonoBehaviour
                 // Check if EV-1 and EV-2 have connected UIA and DCU umbilical
                 // You can add the condition here based on the umbilical connection status
                 // For now, let's assume they are connected
+
+                // Update the status text
+                taskStatusTextMeshPro.gameObject.SetActive(true);
+                taskStatusTextMeshPro.text = $"<color=green>EV-1 and EV-2: Connected UIA and DCU umbilical.</color>";
+                // TODO implement UIA and DCU umb check from EgressTaskController.cs
                 progress = 1f;
                 break;
 
@@ -110,15 +121,21 @@ public class IngressTaskController : MonoBehaviour
                 bool isEVA2PowerOn = uiaDataHandler.GetPower("eva2");
 
                 // Check and change overlay colors if the user has completed the task or not
-                if (isEVA1PowerOn) {
+                if (isEVA1PowerOn)
+                {
                     uiaPanelController.ChangeToCustomColor(0, completedColor);
-                } else {
+                }
+                else
+                {
                     uiaPanelController.ChangeToCustomColor(0, incompleteColor);
                 }
 
-                if (isEVA2PowerOn) {
+                if (isEVA2PowerOn)
+                {
                     uiaPanelController.ChangeToCustomColor(1, completedColor);
-                } else {
+                }
+                else
+                {
                     uiaPanelController.ChangeToCustomColor(1, incompleteColor);
                 }
 
@@ -166,17 +183,17 @@ public class IngressTaskController : MonoBehaviour
 
                 // Check if OXYGEN O2 VENT switch is OPEN
                 bool isOxygenO2VentOpen = uiaDataHandler.GetOxy_Vent();
-               
+
 
                 if (isOxygenO2VentOpen)
                 {
                     uiaPanelController.ChangeToCustomColor(4, inProgressColor); // should stay yellow bc it will eventually hit green in next step
                     progress = 1f;
-                } 
+                }
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"OXYGEN O2 VENT: {(isOxygenO2VentOpen ? "OPEN" : "CLOSED")}";
+                taskStatusTextMeshPro.text = $"<color={GetColorName(isOxygenO2VentOpen)}>OXYGEN O2 VENT: {(isOxygenO2VentOpen ? "OPEN" : "CLOSED")}</color>";
                 break;
 
             case 4: // Step 4: Vent O2 Tanks - Wait until both Primary and Secondary OXY tanks are < 10psi
@@ -199,6 +216,13 @@ public class IngressTaskController : MonoBehaviour
                 float eva1MaxPressure = Mathf.Max(eva1PrimaryPressure, eva1SecondaryPressure);
                 float eva2MaxPressure = Mathf.Max(eva2PrimaryPressure, eva2SecondaryPressure);
 
+                // Debug primary and secondary pressure for both eva1 and 2, also max pressure
+                Debug.Log($"EV1 Primary Pressure: {eva1PrimaryPressure:F0}psi, Secondary Pressure: {eva1SecondaryPressure:F0}psi, Max Pressure: {eva1MaxPressure:F0}psi");
+                Debug.Log($"EV2 Primary Pressure: {eva2PrimaryPressure:F0}psi, Secondary Pressure: {eva2SecondaryPressure:F0}psi, Max Pressure: {eva2MaxPressure:F0}psi");
+
+
+
+
                 float progressEV1 = 0f;
                 float progressEV2 = 0f;
 
@@ -215,6 +239,8 @@ public class IngressTaskController : MonoBehaviour
 
                     progressEV1 = Mathf.Clamp01((float)((oxyPriPressureMax - eva1MaxPressure) / (oxyPriPressureMax - 10f)));
                     progressEV2 = Mathf.Clamp01((float)((oxyPriPressureMax - eva2MaxPressure) / (oxyPriPressureMax - 10f)));
+                    Debug.Log("Do we even get here?");
+                    Debug.Log($"EV1 Progress: {progressEV1:F2}, EV2 Progress: {progressEV2:F2}");
                 }
 
                 UpdateProgressBarSize(progressEV1, progressEV2);
@@ -239,7 +265,7 @@ public class IngressTaskController : MonoBehaviour
                 else
                 {
                     ev1Foreground.GetComponent<Renderer>().material.color = completedColor;
-                    uiaPanelController.ChangeToCustomColor(4, completedColor); 
+                    uiaPanelController.ChangeToCustomColor(4, completedColor);
                 }
 
                 if (progressEV2 < 1f)
@@ -266,6 +292,9 @@ public class IngressTaskController : MonoBehaviour
 
                 if (eva1MaxPressure <= 10f && eva2MaxPressure <= 10f)
                 {
+                    // Debug
+                    Debug.Log("Both EV1 and EV2 O2 tanks are below 10psi. Completed?");
+                    Debug.Log($"EV1 Max Pressure: {eva1MaxPressure:F0}psi, EV2 Max Pressure: {eva2MaxPressure:F0}psi");
                     // GoForward();
                 }
                 break;
@@ -285,14 +314,16 @@ public class IngressTaskController : MonoBehaviour
                 {
                     uiaPanelController.ChangeToCustomColor(4, completedColor);
                     progress = 1f;
-                } else {
+                }
+                else
+                {
                     uiaPanelController.ChangeToCustomColor(4, incompleteColor);
 
                 }
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"OXYGEN O2 VENT: {(isOxygenO2VentClose ? "CLOSED" : "OPEN")}";
+                taskStatusTextMeshPro.text = $"<color={GetColorName(isOxygenO2VentClose)}>OXYGEN O2 VENT: {(isOxygenO2VentClose ? "CLOSED" : "OPEN")}</color>";
                 break;
 
             case 6: // Step 5: Empty Water Tanks - BOTH DCU: PUMP � OPEN
@@ -330,13 +361,15 @@ public class IngressTaskController : MonoBehaviour
                 bool isEVA2WasteWaterOpen = uiaDataHandler.GetWater_Waste("eva2");
 
                 // Check and change overlay colors if the user has completed the task or not
-                if (isEVA1WasteWaterOpen) {
+                if (isEVA1WasteWaterOpen)
+                {
                     uiaPanelController.ChangeToCustomColor(5, inProgressColor);
                 }
 
-                if (isEVA2WasteWaterOpen) {
+                if (isEVA2WasteWaterOpen)
+                {
                     uiaPanelController.ChangeToCustomColor(6, inProgressColor);
-                } 
+                }
                 if (isEVA1WasteWaterOpen && isEVA2WasteWaterOpen)
                 {
                     progress = 1f;
@@ -362,8 +395,12 @@ public class IngressTaskController : MonoBehaviour
                 float eva1CoolantMl = telemetryDataHandler.GetCoolantMl("eva1");
                 float eva2CoolantMl = telemetryDataHandler.GetCoolantMl("eva2");
 
-                float progressEV1case8 = Mathf.Clamp01(eva1CoolantMl / 5f);
-                float progressEV2case8 = Mathf.Clamp01(eva2CoolantMl / 5f);
+                // Reverse the progress calculation for the progress bar
+                float progressEV1case8 = Mathf.Clamp01((100f - eva1CoolantMl) / 95f);
+                float progressEV2case8 = Mathf.Clamp01((100f - eva2CoolantMl) / 95f);
+
+                Debug.Log($"EV1 Coolant: {eva1CoolantMl:F0}ml, EV2 Coolant: {eva2CoolantMl:F0}ml");
+                Debug.Log($"EV1 Progress: {progressEV1case8:F2}, EV2 Progress: {progressEV2case8:F2}");
 
                 UpdateProgressBarSize(progressEV1case8, progressEV2case8);
 
@@ -371,53 +408,48 @@ public class IngressTaskController : MonoBehaviour
                 ev2ProgressTextMeshPro.text = $"EV2: {eva2CoolantMl:F0}% (Current) < 5% (Goal)";
 
                 // Update the color of the progress bars based on their respective progress
-                if (progressEV1case8 < 1f)
+                if (progressEV1case8 > 0f)
                 {
-                    if (progressEV1case8 > 0.01f)
+                    if (progressEV1case8 < 0.99f)
                     {
                         ev1Foreground.GetComponent<Renderer>().material.color = inProgressColor;
                         uiaPanelController.ChangeToCustomColor(5, inProgressColor);
-                        
                     }
                     else
                     {
-                        ev1Foreground.GetComponent<Renderer>().material.color = incompleteColor;
-                        uiaPanelController.ChangeToCustomColor(5, incompleteColor);
-
+                        ev1Foreground.GetComponent<Renderer>().material.color = completedColor;
+                        uiaPanelController.ChangeToCustomColor(5, completedColor);
                     }
                 }
                 else
                 {
-                    ev1Foreground.GetComponent<Renderer>().material.color = completedColor;
-                    uiaPanelController.ChangeToCustomColor(5, completedColor);
-
+                    ev1Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                    uiaPanelController.ChangeToCustomColor(5, incompleteColor);
                 }
 
-                if (progressEV2case8 < 1f)
+                if (progressEV2case8 > 0f)
                 {
-                    if (progressEV2case8 > 0.01f)
+                    if (progressEV2case8 < 0.99f)
                     {
                         ev2Foreground.GetComponent<Renderer>().material.color = inProgressColor;
                         uiaPanelController.ChangeToCustomColor(6, inProgressColor);
-
                     }
                     else
                     {
-                        ev2Foreground.GetComponent<Renderer>().material.color = incompleteColor;
-                        uiaPanelController.ChangeToCustomColor(6, incompleteColor);
-                    
+                        ev2Foreground.GetComponent<Renderer>().material.color = completedColor;
+                        uiaPanelController.ChangeToCustomColor(6, completedColor);
                     }
                 }
                 else
                 {
-                    ev2Foreground.GetComponent<Renderer>().material.color = completedColor;
-                    uiaPanelController.ChangeToCustomColor(6, completedColor);
-
+                    ev2Foreground.GetComponent<Renderer>().material.color = incompleteColor;
+                    uiaPanelController.ChangeToCustomColor(6, incompleteColor);
                 }
 
                 if (eva1CoolantMl <= 5f && eva2CoolantMl <= 5f)
                 {
-                    // GoForward();
+                    Debug.Log("Both EV1 and EV2 Coolant tanks are below 5%. Completed?");
+                    Debug.Log($"EV1 Coolant: {eva1CoolantMl:F0}ml, EV2 Coolant: {eva2CoolantMl:F0}ml");
                 }
                 break;
 
@@ -436,14 +468,20 @@ public class IngressTaskController : MonoBehaviour
                 bool isEVA2WasteWaterClose = !uiaDataHandler.GetWater_Waste("eva2");
 
                 // Check and change overlay colors if the user has completed the task or not
-                if (isEVA1WasteWaterClose) {
+                if (isEVA1WasteWaterClose)
+                {
                     uiaPanelController.ChangeToCustomColor(5, completedColor);
-                } else {
+                }
+                else
+                {
                     uiaPanelController.ChangeToCustomColor(5, incompleteColor);
                 }
-                if (isEVA2WasteWaterClose) {
+                if (isEVA2WasteWaterClose)
+                {
                     uiaPanelController.ChangeToCustomColor(6, completedColor);
-                } else {
+                }
+                else
+                {
                     uiaPanelController.ChangeToCustomColor(6, incompleteColor);
                 }
 
@@ -472,15 +510,21 @@ public class IngressTaskController : MonoBehaviour
                 bool isEVA2PowerOff = !uiaDataHandler.GetPower("eva2");
 
                 // Check and change overlay colors if the user has completed the task or not
-                if (isEVA1PowerOff) {
+                if (isEVA1PowerOff)
+                {
                     uiaPanelController.ChangeToCustomColor(0, completedColor);
-                } else {
+                }
+                else
+                {
                     uiaPanelController.ChangeToCustomColor(0, incompleteColor);
                 }
 
-                if (isEVA2PowerOff) {
+                if (isEVA2PowerOff)
+                {
                     uiaPanelController.ChangeToCustomColor(1, completedColor);
-                } else {
+                }
+                else
+                {
                     uiaPanelController.ChangeToCustomColor(1, incompleteColor);
                 }
 
@@ -501,11 +545,27 @@ public class IngressTaskController : MonoBehaviour
 
                 // Deactivate all overlays, this task doesn't require UIA panel
                 uiaPanelController.DeactivateAllOverlays();
-                
+
+                // Add text
+                taskStatusTextMeshPro.gameObject.SetActive(true);
+                taskStatusTextMeshPro.text = $"<color=green>EV-1 and EV-2: Disconnected UIA and DCU umbilical.</color>";
 
                 // Check if EV1 and EV2 have disconnected UIA and DCU umbilical
                 // You can add the condition here based on the umbilical disconnection status
                 // For now, let's assume they are disconnected
+                progress = 1f;
+                break;
+            case 12:
+                // Reset progress bar and text
+                ResetProgressBarAndText();
+
+                // Deactivate all overlays for other cases
+                uiaPanelController.DeactivateAllOverlays();
+
+                // Add text
+                taskStatusTextMeshPro.gameObject.SetActive(true);
+                taskStatusTextMeshPro.text = $"<color=green>Congratulations! You have completed the SIGMA ingress task.</color>";
+
                 progress = 1f;
                 break;
 
@@ -514,7 +574,9 @@ public class IngressTaskController : MonoBehaviour
                 ResetProgressBarAndText();
                 // Deactivate all overlays for other cases
                 uiaPanelController.DeactivateAllOverlays();
-                
+
+
+                progress = 1f;
                 break;
         }
 

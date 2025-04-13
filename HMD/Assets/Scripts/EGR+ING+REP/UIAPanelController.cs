@@ -17,8 +17,9 @@ public class UIAPanelImage : MonoBehaviour
     public GameObject O2Vent;
     public GameObject H2OWasteEV1;
     public GameObject H2OWasteEV2;
-    // public RawImage testImage;
-
+    public GameObject DepressPumpPWR;
+    public GameObject H2OSupplyEV1;
+    public GameObject H2OSupplyEV2;
     // Array to hold all overlay objects
     private GameObject[] overlays;
 
@@ -44,7 +45,7 @@ public class UIAPanelImage : MonoBehaviour
         // Position should be set to the left of the user
         PositionPanelToLeftOfUser();
         
-        overlays = new GameObject[] { PWREV1, PWREV2, O2EV1, O2EV2, O2Vent, H2OWasteEV1, H2OWasteEV2 };
+        overlays = new GameObject[] { PWREV1, PWREV2, O2EV1, O2EV2, O2Vent, H2OWasteEV1, H2OWasteEV2, DepressPumpPWR, H2OSupplyEV1, H2OSupplyEV2};
 
         // Hide all overlays initially
         DeactivateAllOverlays();
