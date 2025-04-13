@@ -49,8 +49,13 @@ public class SecondaryOxygenLevelDisplay : MonoBehaviour
         // Update EV1 oxygen level
         string ev1Key = "eva1";
         float ev1OxygenLevel = telemetryDataHandler.GetOxySecStorage(ev1Key);
+        // Debug.Log($"EV1 Secondary Oxygen Level: {ev1OxygenLevel}");
 
-        float ev1Progress = Mathf.Clamp01((ev1OxygenLevel - (float)dataRanges.oxy_pri_storage.Min) / (float)(dataRanges.oxy_pri_storage.Max - dataRanges.oxy_pri_storage.Min));
+
+
+        float ev1Progress = Mathf.Clamp01(ev1OxygenLevel/100f);
+
+        // Debug.Log($"EV1 Secondary Oxygen Level Progress: {ev1Progress}");
         UpdateForegroundBarSize(ev1foreground, ev1background, ev1Progress);
 
         ev1oxygenLevelTextMeshPro.text = $"{ev1OxygenLevel:F0}%";
@@ -71,8 +76,12 @@ public class SecondaryOxygenLevelDisplay : MonoBehaviour
         // Update EV2 oxygen level
         string ev2Key = "eva2";
         float ev2OxygenLevel = telemetryDataHandler.GetOxySecStorage(ev2Key);
+        // Debug.Log($"EV2 Secondary Oxygen Level: {ev2OxygenLevel}");
 
-        float ev2Progress = Mathf.Clamp01((ev2OxygenLevel - (float)dataRanges.oxy_pri_storage.Min) / (float)(dataRanges.oxy_pri_storage.Max - dataRanges.oxy_pri_storage.Min));
+        float ev2Progress = Mathf.Clamp01(ev2OxygenLevel/100f);
+        
+        // Debug.Log($"EV2 Secondary Oxygen Level Progress: {ev2Progress}");
+        
         UpdateForegroundBarSize(ev2foreground, ev2background, ev2Progress);
 
         ev2oxygenLevelTextMeshPro.text = $"{ev2OxygenLevel:F0}%";
@@ -111,25 +120,4 @@ public class SecondaryOxygenLevelDisplay : MonoBehaviour
         // Update foreground local position
         foreground.localPosition = foregroundPosition;
     }
-
-    // private static void UpdateForegroundBarSize(float progress)
-    // {
-    //     Vector3 backgroundScale = background.localScale;
-    //     Vector3 foregroundScale = foreground.localScale;
-
-    //     // Calculate the new scale of the foreground object
-    //     foregroundScale.x = backgroundScale.x * progress;
-
-    //     // Update the scale of the foreground object
-    //     foreground.localScale = foregroundScale;
-
-    //     // Align the left side of the foreground bar with the left side of the background bar
-    //     Vector3 foregroundPosition = foreground.localPosition;
-    //     Vector3 backgroundPosition = background.localPosition;
-    //     float leftPivot = backgroundPosition.x - backgroundScale.x * 0.5f;
-    //     foregroundPosition.x = leftPivot + foregroundScale.x * 0.5f;
-
-    //     // Update foreground local position
-    //     foreground.localPosition = foregroundPosition;
-    // }
 }

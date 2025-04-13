@@ -2,7 +2,7 @@ using UnityEngine;
 using TMPro;
 
 public class PrimaryOxygenLevelDisplay : MonoBehaviour
-{   
+{
     [Header("Primary Oxygen Level Display")]
     [Tooltip("This script is for PRIMARY oxygen levels for both EVAs.")]
     [Header("TSS References")]
@@ -10,7 +10,7 @@ public class PrimaryOxygenLevelDisplay : MonoBehaviour
     public DataRanges dataRanges;
     // This script allows us to get current EVA Number, used to denote which EVA is primary.
     public EVANumberHandler evaNumberHandler;
-    
+
     // The new interface design seems to want information for both EVAs.
     // I've added information for both EVAs in the EVTDisplay.
     // We still use the EVA Number Handler to denote which EVA is the primary one.
@@ -31,9 +31,6 @@ public class PrimaryOxygenLevelDisplay : MonoBehaviour
     public Color warningColor = Color.yellow;
     public Color criticalColor = Color.red;
 
-
-    
-
     private void Update()
     {
         UpdateOxygenLevel();
@@ -44,8 +41,8 @@ public class PrimaryOxygenLevelDisplay : MonoBehaviour
         // Update EV1 oxygen level
         string ev1Key = "eva1";
         float ev1OxygenLevel = telemetryDataHandler.GetOxyPriStorage(ev1Key);
+        float ev1Progress = Mathf.Clamp01(ev1OxygenLevel / 100f);
 
-        float ev1Progress = Mathf.Clamp01((ev1OxygenLevel - (float)dataRanges.oxy_pri_storage.Min) / (float)(dataRanges.oxy_pri_storage.Max - dataRanges.oxy_pri_storage.Min));
         UpdateForegroundBarSize(ev1foreground, ev1background, ev1Progress);
 
         ev1oxygenLevelTextMeshPro.text = $"{ev1OxygenLevel:F0}%";
@@ -66,8 +63,8 @@ public class PrimaryOxygenLevelDisplay : MonoBehaviour
         // Update EV2 oxygen level
         string ev2Key = "eva2";
         float ev2OxygenLevel = telemetryDataHandler.GetOxyPriStorage(ev2Key);
+        float ev2Progress = Mathf.Clamp01(ev2OxygenLevel / 100f);
 
-        float ev2Progress = Mathf.Clamp01((ev2OxygenLevel - (float)dataRanges.oxy_pri_storage.Min) / (float)(dataRanges.oxy_pri_storage.Max - dataRanges.oxy_pri_storage.Min));
         UpdateForegroundBarSize(ev2foreground, ev2background, ev2Progress);
 
         ev2oxygenLevelTextMeshPro.text = $"{ev2OxygenLevel:F0}%";
@@ -106,25 +103,4 @@ public class PrimaryOxygenLevelDisplay : MonoBehaviour
         // Update foreground local position
         foreground.localPosition = foregroundPosition;
     }
-
-    // private static void UpdateForegroundBarSize(float progress)
-    // {
-    //     Vector3 backgroundScale = background.localScale;
-    //     Vector3 foregroundScale = foreground.localScale;
-
-    //     // Calculate the new scale of the foreground object
-    //     foregroundScale.x = backgroundScale.x * progress;
-
-    //     // Update the scale of the foreground object
-    //     foreground.localScale = foregroundScale;
-
-    //     // Align the left side of the foreground bar with the left side of the background bar
-    //     Vector3 foregroundPosition = foreground.localPosition;
-    //     Vector3 backgroundPosition = background.localPosition;
-    //     float leftPivot = backgroundPosition.x - backgroundScale.x * 0.5f;
-    //     foregroundPosition.x = leftPivot + foregroundScale.x * 0.5f;
-
-    //     // Update foreground local position
-    //     foreground.localPosition = foregroundPosition;
-    // }
 }
