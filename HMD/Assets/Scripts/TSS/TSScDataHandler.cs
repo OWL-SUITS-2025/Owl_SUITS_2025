@@ -16,6 +16,10 @@ public class TSScDataHandler : MonoBehaviour
     private string COMMData;
     private string IMUData;
 
+    private string ROVER_TELEMETRYData;
+    private string ERRORData;
+    private string EVAData;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -81,6 +85,27 @@ public class TSScDataHandler : MonoBehaviour
             IMUData = TSSc.GetIMUJsonString();
             // Debug.Log("IMU Data Updated: " + IMUData);
         }
+
+        // Check if Rover_Telemetry data has been updated
+        if (TSSc.isROVER_TELEMETRYUpdated())
+        {
+            ROVER_TELEMETRYData = TSSc.GetROVER_TELEMETRYJsonString();
+            // Debug.Log("ROVER_TELEMETRY Data Updated: " + ROVER_TELEMETRYData);
+        }
+
+        // Check if ERROR data has been updated
+        if (TSSc.isERRORUpdated())
+        {
+            ERRORData = TSSc.GetERRORJsonString();
+            // Debug.Log("ERROR Data Updated: " + ERRORData);
+        }
+
+        // Check if EVA data has been updated
+        if (TSSc.isEVAUpdated())
+        {
+            EVAData = TSSc.GetEVAJsonString();
+            // Debug.Log("EVA Data Updated: " + EVAData);
+        }
     }
 
     // Accessors for the stored JSON data
@@ -125,5 +150,22 @@ public class TSScDataHandler : MonoBehaviour
     public string GetIMUData()
     {
         return IMUData;
+    }
+
+    // Get ROVER_TELEMETRY data
+    public string GetROVER_TELEMETRYData()
+    {
+        return ROVER_TELEMETRYData;
+    }
+
+    // Get ERROR data
+    public string GetERRORData()
+    {
+        return ERRORData;
+    }
+
+    public string GetEVAData()
+    {  
+        return EVAData;
     }
 }
