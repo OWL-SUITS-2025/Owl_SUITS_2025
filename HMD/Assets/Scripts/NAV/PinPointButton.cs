@@ -3,6 +3,12 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Windows.Speech;
 using TMPro;
+using UnityEngine;
+using TMPro;
+using System.Collections;
+using Microsoft.MixedReality.Toolkit.UI;
+using MixedReality.Toolkit;
+using MixedReality.Toolkit.UX;
 
 
 public class PinPointButton : MonoBehaviour
@@ -12,10 +18,10 @@ public class PinPointButton : MonoBehaviour
     [SerializeField] private GameObject hazardPinPrefab;
     [SerializeField] private GameObject samplePinPrefab;
 
-    [Header("UI Backplates")]
-    [SerializeField] private GameObject generalPinBackplate;
-    [SerializeField] private GameObject hazardPinBackplate;
-    [SerializeField] private GameObject samplePinBackplate;
+    [Header("Buttons")]
+    [SerializeField] private StatefulInteractable generalPinBackplate;
+    [SerializeField] private StatefulInteractable hazardPinBackplate;
+    [SerializeField] private StatefulInteractable samplePinBackplate;
 
     [Header("Ray Interactor")]
     [SerializeField] private UnityEngine.XR.Interaction.Toolkit.Interactors.XRRayInteractor rayInteractor; // Drag the right hand or desired ray interactor here
@@ -38,7 +44,13 @@ public class PinPointButton : MonoBehaviour
 
     private void Start()
     {
-        
+        if (generalPinBackplate != null)
+            generalPinBackplate.OnClicked.AddListener(() => OnGeneralPinButtonPressed());
+        if (samplePinBackplate != null)
+            samplePinBackplate.OnClicked.AddListener(() => OnSamplePinButtonPressed());
+        if (hazardPinBackplate != null)
+            hazardPinBackplate.OnClicked.AddListener(() => OnHazardPinButtonPressed());
+
 
         keywordRecognizer = new KeywordRecognizer(keywords);
         keywordRecognizer.OnPhraseRecognized += OnPhraseRecognized;
@@ -117,16 +129,26 @@ public class PinPointButton : MonoBehaviour
         UnhighlightButton(hazardPinBackplate);
     }
 
-    private void HighlightButton(GameObject backplate)
+    public void OnCancelPressed()
     {
-        if (backplate != null) backplate.SetActive(true);
-        Debug.Log("we are hightlighting" + backplate);
+        isGeneralPinButtonPressed = false;
+        isHazardPinButtonPressed = false;
+        isSamplePinButtonPressed = false;
+        UnhighlightButton(samplePinBackplate);
+        UnhighlightButton(generalPinBackplate);
+        UnhighlightButton(hazardPinBackplate);
     }
 
-    private void UnhighlightButton(GameObject backplate)
+    private void HighlightButton(StatefulInteractable backplate)
     {
-        if (backplate != null) backplate.SetActive(false);
-        Debug.Log("we are not highlighting" + backplate);
+        if (backplate != null) backplate.ForceSetToggled(true);
+        
+    }
+
+    private void UnhighlightButton(StatefulInteractable backplate)
+    {
+        if (backplate != null) backplate.ForceSetToggled(false);
+        
     }
 
     private void PlacePin(GameObject pinPrefab)

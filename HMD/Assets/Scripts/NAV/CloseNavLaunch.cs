@@ -17,4 +17,18 @@ public class CloseNavLaunch : MonoBehaviour
             Debug.LogError("No GameObject assigned to objectToDeactivate!");
         }
     }
+
+    public void ShowObject()
+    {
+        if (objectToDeactivate != null)
+        {
+            // Activate the GameObject
+            objectToDeactivate.SetActive(true);
+            Debug.Log("IDKDKDKKDKKD");
+        }
+        else
+        {
+            Debug.LogError("No GameObject assigned to objectToDeactivate!");
+        }
+    }
 }
