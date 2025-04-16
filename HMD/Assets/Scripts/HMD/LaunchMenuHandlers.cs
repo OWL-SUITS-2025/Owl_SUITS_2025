@@ -80,6 +80,7 @@ public class LaunchMenuHandlers : MonoBehaviour
         host = "127.0.0.1";
         
         // This is for TSS, make sure ur in team in web panel 
+        // off by one, this will be team 7 on the panel
         team = 6;
 
         // Print Hostname to Logs
