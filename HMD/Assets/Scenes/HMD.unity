@@ -1285,7 +1285,6 @@ GameObject:
   m_Component:
   - component: {fileID: 30758604}
   - component: {fileID: 30758607}
-  - component: {fileID: 30758606}
   - component: {fileID: 30758605}
   m_Layer: 0
   m_Name: Label
@@ -1407,14 +1406,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 30758607}
   m_maskType: 0
---- !u!222 &30758606
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 30758603}
-  m_CullTransparentMesh: 0
 --- !u!23 &30758607
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -7846,13 +7837,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6366612889032461850, guid: 8ace9c04082e8ce4ea440f9bef681ce3, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 564332035890725350, guid: 8ace9c04082e8ce4ea440f9bef681ce3, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8ace9c04082e8ce4ea440f9bef681ce3, type: 3}
 --- !u!1 &160970700
 GameObject:
@@ -11700,9 +11685,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c33eda95daccddc40967e54824bc1897, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  specDataHandler: {fileID: 0}
-  tsscConnection: {fileID: 0}
-  evaNumberHandler: {fileID: 0}
+  specDataHandler: {fileID: 214973439}
+  tsscConnection: {fileID: 1305093189}
+  evaNumberHandler: {fileID: 791165242}
   specResultsText: {fileID: 2001571617}
 --- !u!114 &217837160
 MonoBehaviour:
@@ -11716,10 +11701,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c21c1137ea5228840a7b4380409b6c38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  imuDataHandler: {fileID: 0}
-  telemetryDataHandler: {fileID: 0}
-  evaNumberHandler: {fileID: 0}
-  tsscConnection: {fileID: 0}
+  imuDataHandler: {fileID: 1926043996}
+  telemetryDataHandler: {fileID: 1110655299}
+  evaNumberHandler: {fileID: 791165242}
+  tsscConnection: {fileID: 1305093189}
   dateTimeLocationText: {fileID: 2096548950}
 --- !u!114 &217837161
 MonoBehaviour:
@@ -11747,10 +11732,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stepDisplayText: {fileID: 1290158975}
-  specDataHandler: {fileID: 0}
+  specDataHandler: {fileID: 214973439}
   collectColor: {r: 0, g: 1, b: 0, a: 1}
   doNotCollectColor: {r: 1, g: 0, b: 0, a: 1}
-  EVAnum: {fileID: 0}
+  EVAnum: {fileID: 791165242}
 --- !u!1 &218147940
 GameObject:
   m_ObjectHideFlags: 0
@@ -25667,10 +25652,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3515026244165189237, guid: 21a70de3c3bb16548abfc17d97d8abc9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 21a70de3c3bb16548abfc17d97d8abc9, type: 3}
 --- !u!1 &491254553
 GameObject:
@@ -32139,7 +32121,6 @@ GameObject:
   m_Component:
   - component: {fileID: 633313501}
   - component: {fileID: 633313504}
-  - component: {fileID: 633313503}
   - component: {fileID: 633313502}
   m_Layer: 0
   m_Name: KeyboardDebugText
@@ -32261,14 +32242,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 633313504}
   m_maskType: 0
---- !u!222 &633313503
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 633313500}
-  m_CullTransparentMesh: 0
 --- !u!23 &633313504
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -38738,6 +38711,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MRTK XR Rig
       objectReference: {fileID: 0}
+    - target: {fileID: 6268457481263998533, guid: acbf65a81ce2cf94f82a0809298acf70, type: 3}
+      propertyPath: m_InteractionManager
+      value: 
+      objectReference: {fileID: 1511618847}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -42180,7 +42157,6 @@ GameObject:
   m_Component:
   - component: {fileID: 792154708}
   - component: {fileID: 792154710}
-  - component: {fileID: 792154709}
   - component: {fileID: 792154711}
   m_Layer: 0
   m_Name: IngressTaskText
@@ -42208,14 +42184,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0.1500801, y: 0.2063}
   m_SizeDelta: {x: 0.32899, y: 0.04309}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &792154709
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 792154707}
-  m_CullTransparentMesh: 0
 --- !u!23 &792154710
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -43135,7 +43103,6 @@ GameObject:
   m_Component:
   - component: {fileID: 814439072}
   - component: {fileID: 814439070}
-  - component: {fileID: 814439071}
   - component: {fileID: 814439069}
   m_Layer: 0
   m_Name: IngressStepTitleText
@@ -43283,14 +43250,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!222 &814439071
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 814439068}
-  m_CullTransparentMesh: 0
 --- !u!224 &814439072
 RectTransform:
   m_ObjectHideFlags: 0
@@ -44639,7 +44598,6 @@ GameObject:
   m_Component:
   - component: {fileID: 860389086}
   - component: {fileID: 860389089}
-  - component: {fileID: 860389088}
   - component: {fileID: 860389087}
   m_Layer: 0
   m_Name: MenuTitle
@@ -44761,14 +44719,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 860389089}
   m_maskType: 0
---- !u!222 &860389088
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 860389085}
-  m_CullTransparentMesh: 0
 --- !u!23 &860389089
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -50072,7 +50022,6 @@ GameObject:
   m_Component:
   - component: {fileID: 963525019}
   - component: {fileID: 963525017}
-  - component: {fileID: 963525018}
   - component: {fileID: 963525016}
   m_Layer: 0
   m_Name: IngressEV2ProgressText
@@ -50220,14 +50169,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!222 &963525018
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963525015}
-  m_CullTransparentMesh: 0
 --- !u!224 &963525019
 RectTransform:
   m_ObjectHideFlags: 0
@@ -52780,7 +52721,6 @@ GameObject:
   m_Component:
   - component: {fileID: 993697898}
   - component: {fileID: 993697901}
-  - component: {fileID: 993697900}
   - component: {fileID: 993697899}
   m_Layer: 0
   m_Name: IngressTaskStatusText
@@ -52902,14 +52842,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 993697901}
   m_maskType: 0
---- !u!222 &993697900
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 993697897}
-  m_CullTransparentMesh: 0
 --- !u!23 &993697901
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -62154,7 +62086,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1122339322}
-  - component: {fileID: 1122339325}
   - component: {fileID: 1122339324}
   - component: {fileID: 1122339323}
   m_Layer: 0
@@ -62328,14 +62259,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!222 &1122339325
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1122339321}
-  m_CullTransparentMesh: 1
 --- !u!1 &1123441391
 GameObject:
   m_ObjectHideFlags: 0
@@ -65871,7 +65794,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1198172004}
   - component: {fileID: 1198172007}
-  - component: {fileID: 1198172006}
   - component: {fileID: 1198172005}
   m_Layer: 0
   m_Name: EVSelectionInstructionText
@@ -65993,14 +65915,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 1198172007}
   m_maskType: 0
---- !u!222 &1198172006
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1198172003}
-  m_CullTransparentMesh: 0
 --- !u!23 &1198172007
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -79150,13 +79064,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6366612889032461850, guid: 8ace9c04082e8ce4ea440f9bef681ce3, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 564332035890725350, guid: 8ace9c04082e8ce4ea440f9bef681ce3, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8ace9c04082e8ce4ea440f9bef681ce3, type: 3}
 --- !u!1 &1370700375
 GameObject:
@@ -79858,7 +79766,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1398524829}
   - component: {fileID: 1398524831}
-  - component: {fileID: 1398524830}
   - component: {fileID: 1398524832}
   m_Layer: 0
   m_Name: IngressEV1ProgressText
@@ -79886,14 +79793,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0.10978, y: 0.2195}
   m_SizeDelta: {x: 0.23319, y: 0.02849}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &1398524830
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1398524828}
-  m_CullTransparentMesh: 0
 --- !u!23 &1398524831
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -84151,7 +84050,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1491063597}
-  - component: {fileID: 1491063600}
   - component: {fileID: 1491063599}
   - component: {fileID: 1491063598}
   m_Layer: 0
@@ -84321,14 +84219,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!222 &1491063600
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1491063596}
-  m_CullTransparentMesh: 1
 --- !u!1 &1492671431
 GameObject:
   m_ObjectHideFlags: 0
@@ -84815,6 +84705,17 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1504601395}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1511618847 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 800708247703322884, guid: acbf65a81ce2cf94f82a0809298acf70, type: 3}
+  m_PrefabInstance: {fileID: 743261423}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83e4e6cca11330d4088d729ab4fc9d9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1512490549
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -89720,7 +89621,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1577596279}
   - component: {fileID: 1577596277}
-  - component: {fileID: 1577596278}
   - component: {fileID: 1577596276}
   m_Layer: 0
   m_Name: IngressSwitchLocationText
@@ -89870,14 +89770,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!222 &1577596278
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1577596275}
-  m_CullTransparentMesh: 0
 --- !u!224 &1577596279
 RectTransform:
   m_ObjectHideFlags: 0
@@ -94093,7 +93985,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1663480696}
   - component: {fileID: 1663480699}
-  - component: {fileID: 1663480698}
   - component: {fileID: 1663480697}
   m_Layer: 0
   m_Name: IPInstructionText
@@ -94215,14 +94106,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 1663480699}
   m_maskType: 0
---- !u!222 &1663480698
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1663480695}
-  m_CullTransparentMesh: 0
 --- !u!23 &1663480699
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -99702,10 +99585,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3515026244165189237, guid: 21a70de3c3bb16548abfc17d97d8abc9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 21a70de3c3bb16548abfc17d97d8abc9, type: 3}
 --- !u!1 &1767480636
 GameObject:
@@ -103796,6 +103676,17 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1841194913 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6268457481263998533, guid: acbf65a81ce2cf94f82a0809298acf70, type: 3}
+  m_PrefabInstance: {fileID: 743261423}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e85416945309f8244a5715a2ec5c254f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1841934333
 GameObject:
   m_ObjectHideFlags: 0
@@ -107051,7 +106942,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1890245815}
   - component: {fileID: 1890245818}
-  - component: {fileID: 1890245817}
   - component: {fileID: 1890245816}
   m_Layer: 0
   m_Name: MenuTitle
@@ -107173,14 +107063,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 1890245818}
   m_maskType: 0
---- !u!222 &1890245817
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1890245814}
-  m_CullTransparentMesh: 0
 --- !u!23 &1890245818
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -108964,7 +108846,7 @@ MonoBehaviour:
   generalPinBackplate: {fileID: 1978523309}
   hazardPinBackplate: {fileID: 2143135095}
   samplePinBackplate: {fileID: 1746587020}
-  rayInteractor: {fileID: 0}
+  rayInteractor: {fileID: 1841194913}
   onGeneralPinClick:
     m_PersistentCalls:
       m_Calls: []
@@ -110723,7 +110605,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1935946454}
-  - component: {fileID: 1935946457}
   - component: {fileID: 1935946456}
   - component: {fileID: 1935946455}
   m_Layer: 0
@@ -110891,14 +110772,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!222 &1935946457
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1935946453}
-  m_CullTransparentMesh: 1
 --- !u!1 &1936621886
 GameObject:
   m_ObjectHideFlags: 0
@@ -110909,7 +110782,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1936621890}
   - component: {fileID: 1936621888}
-  - component: {fileID: 1936621889}
   - component: {fileID: 1936621887}
   m_Layer: 0
   m_Name: TSSServerAddressInput
@@ -111057,14 +110929,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!222 &1936621889
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1936621886}
-  m_CullTransparentMesh: 0
 --- !u!224 &1936621890
 RectTransform:
   m_ObjectHideFlags: 0
@@ -111218,10 +111082,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3515026244165189237, guid: 21a70de3c3bb16548abfc17d97d8abc9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 21a70de3c3bb16548abfc17d97d8abc9, type: 3}
 --- !u!1 &1941893883
 GameObject:
@@ -123160,7 +123021,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 760817348946412826, guid: bb79e5f916ecfda4da5534b517fa9cbb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: bb79e5f916ecfda4da5534b517fa9cbb, type: 3}
 --- !u!1 &2351505566716010099 stripped
 GameObject:
