@@ -15,6 +15,9 @@ public class FieldNotebookManager : MonoBehaviour
     // Reference to the Add Button
     public PressableButton addButton;
     
+    // Reference to the Close Button
+    public PressableButton closeButton;
+    
     // Spacing between Field Notes
     public float horizontalSpacing = 0.3f;
     
@@ -37,6 +40,16 @@ public class FieldNotebookManager : MonoBehaviour
         {
             // Register Add Button click event
             addButton.OnClicked.AddListener(SpawnNewFieldNote);
+        }
+        
+        if (closeButton == null)
+        {
+            Debug.LogError("Close Button is not assigned. Please assign it in the inspector.");
+        }
+        else
+        {
+            // Register Close Button click event
+            closeButton.OnClicked.AddListener(CloseNotebook);
         }
     }
     
@@ -66,5 +79,12 @@ public class FieldNotebookManager : MonoBehaviour
         spawnedFieldNotes.Add(newFieldNote);
         
         Debug.Log("New Field Note spawned. Total count: " + spawnedFieldNotes.Count);
+    }
+    
+    public void CloseNotebook()
+    {
+        // Deactivate this GameObject when close button is pressed
+        gameObject.SetActive(false);
+        Debug.Log("Field Notebook closed.");
     }
 }
