@@ -1,19 +1,43 @@
+// NOTE: We could probably merge both this script and PrimaryOxygenLevelDisplay.cs
+// I say this because the only difference is the function call on line 51/73 (telemetryDataHandler.GetOxySecStorage(ev1Key))
+// But for now, we will keep them separate.
+
+
 using UnityEngine;
 using TMPro;
 
 public class SecondaryOxygenLevelDisplay : MonoBehaviour
 {
+    [Header("Secondary Oxygen Level Display")]
+    [Tooltip("This script is for SECONDARY oxygen levels for both EVAs.")]
+    [Header("TSS References")]
     public TELEMETRYDataHandler telemetryDataHandler;
     public DataRanges dataRanges;
-    public Transform background;
-    public Transform foreground;
-    public TextMeshPro oxygenLevelTextMeshPro;
+    // This script allows us to get current EVA Number, used to denote which EVA is primary.
+    public EVANumberHandler evaNumberHandler;
+    
+    // The new interface design seems to want information for both EVAs.
+    // I've added information for both EVAs in the EVTDisplay.
+    // We still use the EVA Number Handler to denote which EVA is the primary one.
+    // (e.g., if user is EVA1, then EVA1 is primary and EVA2 is secondary)
+
+    [Header("EV1 UI References")]
+    public Transform ev1background;
+    public Transform ev1foreground;
+    public TextMeshPro ev1oxygenLevelTextMeshPro;
+
+    [Header("EV2 UI References")]
+    public Transform ev2background;
+    public Transform ev2foreground;
+    public TextMeshPro ev2oxygenLevelTextMeshPro;
+
+    [Header("Color Configuration")]
     public Color normalColor = Color.green;
     public Color warningColor = Color.yellow;
     public Color criticalColor = Color.red;
 
-    // This script allows us to get current EVA Number
-    public EVANumberHandler evaNumberHandler;
+
+    
 
     private void Update()
     {
@@ -22,36 +46,61 @@ public class SecondaryOxygenLevelDisplay : MonoBehaviour
 
     private void UpdateOxygenLevel()
     {
-        int evaNumber = evaNumberHandler.getEVANumber();
-        string evaKey = $"eva{evaNumber}";
+        // Update EV1 oxygen level
+        string ev1Key = "eva1";
+        float ev1OxygenLevel = telemetryDataHandler.GetOxySecStorage(ev1Key);
+        // Debug.Log($"EV1 Secondary Oxygen Level: {ev1OxygenLevel}");
 
-        float oxygenLevel = telemetryDataHandler.GetOxySecStorage(evaKey);
 
-        // Calculate the progress based on the oxygen level and data ranges
-        float progress = Mathf.Clamp01((oxygenLevel - (float)dataRanges.oxy_pri_storage.Min) / (float)(dataRanges.oxy_pri_storage.Max - dataRanges.oxy_pri_storage.Min));
 
-        // Update the foreground bar size
-        UpdateForegroundBarSize(progress);
+        float ev1Progress = Mathf.Clamp01(ev1OxygenLevel/100f);
 
-        // Update the oxygen level text
-        oxygenLevelTextMeshPro.text = $"{oxygenLevel:F0}%";
+        // Debug.Log($"EV1 Secondary Oxygen Level Progress: {ev1Progress}");
+        UpdateForegroundBarSize(ev1foreground, ev1background, ev1Progress);
 
-        // Change the color of the bar based on the oxygen level
-        if (oxygenLevel < 30f)
+        ev1oxygenLevelTextMeshPro.text = $"{ev1OxygenLevel:F0}%";
+
+        if (ev1OxygenLevel < 30f)
         {
-            foreground.GetComponent<Renderer>().material.color = criticalColor;
+            ev1foreground.GetComponent<Renderer>().material.color = criticalColor;
         }
-        else if (oxygenLevel < 60f)
+        else if (ev1OxygenLevel < 60f)
         {
-            foreground.GetComponent<Renderer>().material.color = warningColor;
+            ev1foreground.GetComponent<Renderer>().material.color = warningColor;
         }
         else
         {
-            foreground.GetComponent<Renderer>().material.color = normalColor;
+            ev1foreground.GetComponent<Renderer>().material.color = normalColor;
+        }
+
+        // Update EV2 oxygen level
+        string ev2Key = "eva2";
+        float ev2OxygenLevel = telemetryDataHandler.GetOxySecStorage(ev2Key);
+        // Debug.Log($"EV2 Secondary Oxygen Level: {ev2OxygenLevel}");
+
+        float ev2Progress = Mathf.Clamp01(ev2OxygenLevel/100f);
+        
+        // Debug.Log($"EV2 Secondary Oxygen Level Progress: {ev2Progress}");
+        
+        UpdateForegroundBarSize(ev2foreground, ev2background, ev2Progress);
+
+        ev2oxygenLevelTextMeshPro.text = $"{ev2OxygenLevel:F0}%";
+
+        if (ev2OxygenLevel < 30f)
+        {
+            ev2foreground.GetComponent<Renderer>().material.color = criticalColor;
+        }
+        else if (ev2OxygenLevel < 60f)
+        {
+            ev2foreground.GetComponent<Renderer>().material.color = warningColor;
+        }
+        else
+        {
+            ev2foreground.GetComponent<Renderer>().material.color = normalColor;
         }
     }
 
-    private void UpdateForegroundBarSize(float progress)
+    private static void UpdateForegroundBarSize(Transform foreground, Transform background, float progress)
     {
         Vector3 backgroundScale = background.localScale;
         Vector3 foregroundScale = foreground.localScale;

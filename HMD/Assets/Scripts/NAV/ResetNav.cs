@@ -9,6 +9,8 @@ public class ResetNav : MonoBehaviour
     {
         // Activate the confirmation dialog
         confirmationDialog.SetActive(true);
+       
+
     }
 
     public void ConfirmReset()
@@ -31,6 +33,7 @@ public class ResetNav : MonoBehaviour
     {
         // Find all the pin GameObjects in the scene and destroy them
         GameObject[] pinObjects = GameObject.FindGameObjectsWithTag("Pin");
+        Debug.Log(pinObjects.Length);
         foreach (GameObject pin in pinObjects)
         {
             Destroy(pin);

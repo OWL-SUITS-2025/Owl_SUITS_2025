@@ -77,7 +77,7 @@ public class LaunchMenuHandlers : MonoBehaviour
         //host = "168.4.146.212";
 
         // Using Local Server:
-        host = "127.0.0.1";
+        host = "147.185.221.27";
         
         // This is for TSS, make sure ur in team in web panel 
         // off by one, this will be team 7 on the panel
