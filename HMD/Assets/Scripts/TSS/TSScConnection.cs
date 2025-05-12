@@ -32,11 +32,22 @@ public class TSScConnection : MonoBehaviour
     bool IMUUpdated;
     string IMUJsonString;
 
+    // New JSONS 2025
+
+    bool ROVER_TELEMETRYUpdated;
+    string ROVER_TELEMETRYJsonString;
+    bool ERRORUpdated;
+    string ERRORJsonString;
+    bool EVAUpdated;
+    string EVAJsonString;
+
+
+
     // Connect to TSSc with a specific team number
     public void ConnectToHost(string host, int team_number)
     {
         this.host = host;
-        this.port = "14141";
+        this.port = "24329";
         this.team_number = team_number;
         this.url = "http://" + this.host + ":" + this.port;
         Debug.Log("Connecting to TSSc with URL: " + this.url);
@@ -75,6 +86,9 @@ public class TSScConnection : MonoBehaviour
                 StartCoroutine(GetTELEMETRYState());
                 StartCoroutine(GetCOMMState());
                 StartCoroutine(GetIMUState());
+                StartCoroutine(GetROVER_TELEMETRYState());
+                StartCoroutine(GetERRORState());
+                StartCoroutine(GetEVAState());
                 time_since_last_update = 0.0f;
             }
         }
@@ -348,6 +362,103 @@ public class TSScConnection : MonoBehaviour
     public bool isIMUUpdated()
     {
         return IMUUpdated;
+    }
+
+    IEnumerator GetROVER_TELEMETRYState()
+    {
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(this.url + "/json_data/teams/" + this.team_number + "/TELEMETRY.json"))
+        {
+            // Request and wait for the desired page.
+            yield return webRequest.SendWebRequest();
+
+            switch (webRequest.result)
+            {
+                case UnityWebRequest.Result.Success:
+                    if (this.ROVER_TELEMETRYJsonString != webRequest.downloadHandler.text)
+                    {
+                        this.ROVER_TELEMETRYUpdated = true;
+                        this.ROVER_TELEMETRYJsonString = webRequest.downloadHandler.text;
+                        // Debug.Log(this.ROVER_TELEMETRYJsonString);
+                    }
+                    break;
+            }
+        }
+    }
+
+    public string GetROVER_TELEMETRYJsonString()
+    {
+        ROVER_TELEMETRYUpdated = false;
+        return this.ROVER_TELEMETRYJsonString;
+    }
+
+    public bool isROVER_TELEMETRYUpdated()
+    {
+        return ROVER_TELEMETRYUpdated;
+    }
+
+
+    IEnumerator GetERRORState()
+    {
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(this.url + "/json_data/ERROR.json"))
+        {
+            // Request and wait for the desired page.
+            yield return webRequest.SendWebRequest();
+
+            switch (webRequest.result)
+            {
+                case UnityWebRequest.Result.Success:
+                    if (this.ERRORJsonString != webRequest.downloadHandler.text)
+                    {
+                        this.ERRORUpdated = true;
+                        this.ERRORJsonString = webRequest.downloadHandler.text;
+                        // Debug.Log(this.ROVER_TELEMETRYJsonString);
+                    }
+                    break;
+            }
+        }
+    }
+
+    public string GetERRORJsonString()
+    {
+        ERRORUpdated = false;
+        return this.ERRORJsonString;
+    }
+
+    public bool isERRORUpdated()
+    {
+        return ERRORUpdated;
+    }
+
+    IEnumerator GetEVAState()
+    {
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(this.url + "/json_data/teams/" + this.team_number + "/EVA.json"))
+        {
+            // Request and wait for the desired page.
+            yield return webRequest.SendWebRequest();
+
+            switch (webRequest.result)
+            {
+                case UnityWebRequest.Result.Success:
+                    if (this.EVAJsonString != webRequest.downloadHandler.text)
+                    {
+                        this.EVAUpdated = true;
+                        this.EVAJsonString = webRequest.downloadHandler.text;
+                        // Debug.Log(this.ROVER_TELEMETRYJsonString);
+                    }
+                    break;
+            }
+        }
+    }
+
+    public string GetEVAJsonString()
+    {
+        EVAUpdated = false;
+        return this.EVAJsonString;
+    }
+
+    public bool isEVAUpdated()
+    {
+        return EVAUpdated;
     }
 
     public bool IsConnected()
