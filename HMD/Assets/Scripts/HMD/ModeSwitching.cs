@@ -19,7 +19,7 @@ public class ModeSwitching : MonoBehaviour
         DisableAllHUDs();
     }
 
-    private void DisableAllHUDs()
+    private void DisableAllHUDs()   
     {
         egressHUD.SetActive(false);
         geoHUD.SetActive(false);

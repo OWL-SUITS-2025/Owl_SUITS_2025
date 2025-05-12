@@ -56,5 +56,14 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "HMD.sln"
+    "dotnet.defaultSolution": "HMD.sln",
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false,
+        "yaml": false,
+        "java": false,
+        "python": false
+    }
 }
