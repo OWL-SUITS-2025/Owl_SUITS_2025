@@ -217,8 +217,8 @@ public class IngressTaskController : MonoBehaviour
                 float eva2MaxPressure = Mathf.Max(eva2PrimaryPressure, eva2SecondaryPressure);
 
                 // Debug primary and secondary pressure for both eva1 and 2, also max pressure
-                Debug.Log($"EV1 Primary Pressure: {eva1PrimaryPressure:F0}psi, Secondary Pressure: {eva1SecondaryPressure:F0}psi, Max Pressure: {eva1MaxPressure:F0}psi");
-                Debug.Log($"EV2 Primary Pressure: {eva2PrimaryPressure:F0}psi, Secondary Pressure: {eva2SecondaryPressure:F0}psi, Max Pressure: {eva2MaxPressure:F0}psi");
+                // Debug.Log($"EV1 Primary Pressure: {eva1PrimaryPressure:F0}psi, Secondary Pressure: {eva1SecondaryPressure:F0}psi, Max Pressure: {eva1MaxPressure:F0}psi");
+                // Debug.Log($"EV2 Primary Pressure: {eva2PrimaryPressure:F0}psi, Secondary Pressure: {eva2SecondaryPressure:F0}psi, Max Pressure: {eva2MaxPressure:F0}psi");
 
 
 
@@ -239,8 +239,7 @@ public class IngressTaskController : MonoBehaviour
 
                     progressEV1 = Mathf.Clamp01((float)((oxyPriPressureMax - eva1MaxPressure) / (oxyPriPressureMax - 10f)));
                     progressEV2 = Mathf.Clamp01((float)((oxyPriPressureMax - eva2MaxPressure) / (oxyPriPressureMax - 10f)));
-                    Debug.Log("Do we even get here?");
-                    Debug.Log($"EV1 Progress: {progressEV1:F2}, EV2 Progress: {progressEV2:F2}");
+                    // Debug.Log($"EV1 Progress: {progressEV1:F2}, EV2 Progress: {progressEV2:F2}");
                 }
 
                 UpdateProgressBarSize(progressEV1, progressEV2);
@@ -293,8 +292,8 @@ public class IngressTaskController : MonoBehaviour
                 if (eva1MaxPressure <= 10f && eva2MaxPressure <= 10f)
                 {
                     // Debug
-                    Debug.Log("Both EV1 and EV2 O2 tanks are below 10psi. Completed?");
-                    Debug.Log($"EV1 Max Pressure: {eva1MaxPressure:F0}psi, EV2 Max Pressure: {eva2MaxPressure:F0}psi");
+                    // Debug.Log("Both EV1 and EV2 O2 tanks are below 10psi. Completed?");
+                    // Debug.Log($"EV1 Max Pressure: {eva1MaxPressure:F0}psi, EV2 Max Pressure: {eva2MaxPressure:F0}psi");
                     // GoForward();
                 }
                 break;
@@ -399,8 +398,8 @@ public class IngressTaskController : MonoBehaviour
                 float progressEV1case8 = Mathf.Clamp01((100f - eva1CoolantMl) / 95f);
                 float progressEV2case8 = Mathf.Clamp01((100f - eva2CoolantMl) / 95f);
 
-                Debug.Log($"EV1 Coolant: {eva1CoolantMl:F0}ml, EV2 Coolant: {eva2CoolantMl:F0}ml");
-                Debug.Log($"EV1 Progress: {progressEV1case8:F2}, EV2 Progress: {progressEV2case8:F2}");
+                // Debug.Log($"EV1 Coolant: {eva1CoolantMl:F0}ml, EV2 Coolant: {eva2CoolantMl:F0}ml");
+                // Debug.Log($"EV1 Progress: {progressEV1case8:F2}, EV2 Progress: {progressEV2case8:F2}");
 
                 UpdateProgressBarSize(progressEV1case8, progressEV2case8);
 
@@ -446,11 +445,11 @@ public class IngressTaskController : MonoBehaviour
                     uiaPanelController.ChangeToCustomColor(6, incompleteColor);
                 }
 
-                if (eva1CoolantMl <= 5f && eva2CoolantMl <= 5f)
-                {
-                    Debug.Log("Both EV1 and EV2 Coolant tanks are below 5%. Completed?");
-                    Debug.Log($"EV1 Coolant: {eva1CoolantMl:F0}ml, EV2 Coolant: {eva2CoolantMl:F0}ml");
-                }
+                // if (eva1CoolantMl <= 5f && eva2CoolantMl <= 5f)
+                // {
+                //     Debug.Log("Both EV1 and EV2 Coolant tanks are below 5%. Completed?");
+                //     Debug.Log($"EV1 Coolant: {eva1CoolantMl:F0}ml, EV2 Coolant: {eva2CoolantMl:F0}ml");
+                // }
                 break;
 
             case 9: // Step 5: Empty Water Tanks - UIA: EV-1, EV-2 WASTE WATER � CLOSE
@@ -564,7 +563,7 @@ public class IngressTaskController : MonoBehaviour
 
                 // Add text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"<color=green>Congratulations! You have completed the SIGMA ingress task.</color>";
+                taskStatusTextMeshPro.text = $"<color=green>Congratulations! You have completed the ingress task.</color>";
 
                 progress = 1f;
                 break;
