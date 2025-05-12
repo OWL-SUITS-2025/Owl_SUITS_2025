@@ -11,6 +11,15 @@ public class StepBoxController : MonoBehaviour
 {
     [SerializeField] private TextMeshPro stepInstructionText;
     
+    // Flag to track if we're in Step 0 (default state)
+    private bool isInDefaultStep = true;
+    
+    private void Start()
+    {
+        // Initialize with Step 0
+        ShowDefaultStep();
+    }
+    
     private void OnEnable()
     {
         // Subscribe to step change events
@@ -23,8 +32,31 @@ public class StepBoxController : MonoBehaviour
         ProcedureChecklistManager.OnStepChanged -= UpdateStepInstructions;
     }
     
+    /// <summary>
+    /// Public method to reset to Step 0 (default state)
+    /// </summary>
+    public void ShowDefaultStep()
+    {
+        isInDefaultStep = true;
+        
+        // Step 0 instructions
+        string instruction = "Ready to Begin\n\n" +
+                          "1. Announce over comms:\n" +
+                          "   • \"Arrived at site, beginning sampling\n" +
+                          "2. Click \"Start New Sample\" Button in Geo Hand Menu\n";
+        
+        // Update the text in the step box
+        if (stepInstructionText != null)
+        {
+            stepInstructionText.text = instruction;
+        }
+    }
+    
     private void UpdateStepInstructions(ProcedureStep step)
     {
+        // When we get a step update from the checklist, we're no longer in the default step
+        isInDefaultStep = false;
+        
         string stepNumber = ((int)step + 1).ToString();
         string instruction = "";
         
@@ -32,22 +64,21 @@ public class StepBoxController : MonoBehaviour
         {
             case ProcedureStep.StartVoiceRecording:
                 instruction = "Step " + stepNumber + ": Start Voice Recording\n\n" +
-                            "• Press the voice recording button on task list\n" + 
-                            "• Voice all thoughts out loud";
+                            "• Press the voice recording button on task list to start voice recording\n" + 
+                            "• Voice all thoughts out loud during sampling";
                 break;
             case ProcedureStep.SetupFieldNote:
                 instruction = "Step " + stepNumber + ": Set Up Field Note\n\n" +
-                            "• Open the field note\n" +
-                            "• Turn on the edit toggle switch";
+                            "• Orientate fieldnote and notebook out of by looking left \n" +
+                            "• Toggle on the edit switch on the field note";
                 break;
             case ProcedureStep.ScanSample:
                 instruction = "Step " + stepNumber + ": Scan the Sample\n\n" +
-                            "• Inspect the rock visually\n" +
                             "• Press and hold trigger to start XRF scan\n" +
                             "• Hold steady until confirmation beep\n" +
-                            "• Release trigger";
+                            "• Comm: \"Scan Complete, PR Verify data recieved\"";
                 break;
-            case ProcedureStep.TakePhoto:
+            case ProcedureStep.TakePhoto:    
                 instruction = "Step " + stepNumber + ": Take a Photo\n\n" +
                             "• Set up diffused lighting\n" +
                             "• Clean camera lens\n" +
@@ -56,13 +87,17 @@ public class StepBoxController : MonoBehaviour
                 break;
             case ProcedureStep.FinishFieldNote:
                 instruction = "Step " + stepNumber + ": Finish Field Note\n\n" +
-                            "• Complete all required fields\n" +
-                            "• Adjust property sliders";
+                            "• Edit all required fields and sliders\n" + 
+                            "• Check fieldnote Significance Indicator (!)\n" +
+                            "• Collect sample if indicator (!) is yellow\n" +
+                            "• Press Complete button to save fieldnote";
                 break;
             case ProcedureStep.Complete:
                 instruction = "Step " + stepNumber + ": Complete Process\n\n" +
-                            "• Press complete button on field note\n" +
-                            "• System will store data and stop recording";
+                            "• Drop pin on sample\n" +
+                            "• Announce over comms:\n" +
+                            " - Sampling complete, PR verify receipt of data\n" + 
+                            " - Beginning nav to next location\n";
                 break;
             case ProcedureStep.Completed:
                 instruction = "Procedure Completed!\n\n" +

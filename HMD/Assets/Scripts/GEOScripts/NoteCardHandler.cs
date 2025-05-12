@@ -12,11 +12,14 @@ public class NoteCardInformation : MonoBehaviour
     // Reference to the single TextMeshPro component on the NoteCard
     public TextMeshProUGUI cardInfoText;
     
+    // Reference to the science indicator (exclamation mark)
+    public GameObject scienceIndicator;
+    
     // Reference to the associated field note GameObject
     private GameObject associatedFieldNote;
     
     // Method to set the card data
-    public void SetCardData(string dateTime, string location, string sampleName, string rockType, GameObject fieldNote)
+    public void SetCardData(string dateTime, string location, string sampleName, string rockType, GameObject fieldNote, bool isScientificallySignificant)
     {
         // Store the reference to the field note
         associatedFieldNote = fieldNote;
@@ -51,6 +54,16 @@ public class NoteCardInformation : MonoBehaviour
             
             // Set the text on the TextMeshPro component
             cardInfoText.text = cardText;
+
+            // Set the science indicator visibility based on scientific significance
+            if (scienceIndicator != null)
+            {
+                scienceIndicator.SetActive(isScientificallySignificant);
+            }
+            else
+            {
+                Debug.LogWarning("Science Indicator reference is not set on NoteCardInformation component");
+            }
         }
         else
         {

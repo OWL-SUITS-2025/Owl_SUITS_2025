@@ -7,12 +7,16 @@ using Microsoft.MixedReality.Toolkit.UI;
 using MixedReality.Toolkit;
 using MixedReality.Toolkit.UX;
 using MixedReality.Toolkit.UX.Experimental;
+using MixedReality.Toolkit.SpatialManipulation;
 
 public class FieldNoteHandler : MonoBehaviour
 {
     // References for Spec Results functionality
     public SPECDataHandler specDataHandler;
     public TextMeshProUGUI specResultsText;
+    
+    // Reference for significance indicator
+    public TextMeshProUGUI sigIndicator;
     
     // References for Field Note Info functionality
     public IMUDataHandler imuDataHandler;
@@ -49,19 +53,12 @@ public class FieldNoteHandler : MonoBehaviour
     // Reference to the NoteCard prefab
     public GameObject noteCardPrefab;
 
-    // Reference to the VirtualizedScrollRectList component
-    public VirtualizedScrollRectList virtualizedScrollRectList;
-
-    // reference itself for the note card
-    public GameObject filedNoteObject;
-
     // List to store note card data during runtime
     private static List<FieldNoteData> noteCards = new List<FieldNoteData>();
 
     // Add a unique identifier for each handler instance
     private static int nextHandlerId = 0;
     private int handlerId;
-
 
     // Variables to store the data
     private string rockType = "";
@@ -82,8 +79,24 @@ public class FieldNoteHandler : MonoBehaviour
     private float localEvaTimeSeconds = 0f;
     private string localDateTime = "";
 
-    // Register the note cards
-    private bool callbacksRegistered = false;
+    // Dictionary to store threshold values for mineral composition
+    private Dictionary<string, Threshold> thresholds = new Dictionary<string, Threshold>();
+
+    // Reference to the Content GameObject where note cards will be spawned
+    private GameObject contentGameObject;
+
+    // Struct to store threshold values for determining scientific significance
+    private struct Threshold
+    {
+        public float value;
+        public bool isGreaterThan;  // true if significant when greater than threshold, false if significant when less than threshold
+
+        public Threshold(float val, bool greater)
+        {
+            value = val;
+            isGreaterThan = greater;
+        }
+    }
 
     // Data structure to hold all field note information
     [System.Serializable]
@@ -99,7 +112,7 @@ public class FieldNoteHandler : MonoBehaviour
         public string dateTime;
         public float evaTimeSeconds;
         public Vector3 location; // x, y, heading
-
+        public bool isScientificallySignificant; 
         public GameObject fieldNoteObject;
         
         public FieldNoteData()
@@ -108,9 +121,11 @@ public class FieldNoteHandler : MonoBehaviour
         }
     }
     
-    // Add at the class level before Start():
     void Start()
     {
+        // Initialize threshold values based on the reference table
+        InitializeThresholds();
+
         // Assign a unique ID to this handler
         handlerId = nextHandlerId++;
         Debug.Log($"FieldNoteHandler {handlerId} initialized");
@@ -139,29 +154,29 @@ public class FieldNoteHandler : MonoBehaviour
             Debug.LogError("GeoHANDLER GameObject not found in the scene.");
         }
 
-        // Find the VirtualizedScrollRectList at runtime
-        if (virtualizedScrollRectList == null)
+        // Find the Content GameObject where note cards will be spawned
+        FindContentGameObject();
+
+        // Find the FieldNoteBook GameObject and set it as the solver handler override
+        GameObject fieldNoteBook = GameObject.Find("FieldNoteBook");
+        if (fieldNoteBook != null)
         {
-            // Find the FieldNoteBook object in the scene
-            GameObject fieldNoteBook = GameObject.Find("FieldNoteBook");
-            
-            if (fieldNoteBook != null)
+            // Get the SolverHandler component on this GameObject
+            SolverHandler solverHandler = GetComponent<SolverHandler>();
+            if (solverHandler != null)
             {
-                // Get the VirtualizedScrollRectList component from it
-                virtualizedScrollRectList = fieldNoteBook.GetComponent<VirtualizedScrollRectList>();
-                
-                if (virtualizedScrollRectList == null)
-                {
-                    // If not on the root, try to find it in children
-                    virtualizedScrollRectList = fieldNoteBook.GetComponentInChildren<VirtualizedScrollRectList>();
-                }
-                
-                Debug.Log("Found VirtualizedScrollRectList at runtime: " + (virtualizedScrollRectList != null));
+                // Set the TransformOverride to the FieldNoteBook transform
+                solverHandler.TransformOverride = fieldNoteBook.transform;
+                Debug.Log("SolverHandler TransformOverride set to FieldNoteBook");
             }
             else
             {
-                Debug.LogError("FieldNoteBook GameObject not found in the scene.");
+                Debug.LogWarning("SolverHandler component not found on this GameObject");
             }
+        }
+        else
+        {
+            Debug.LogError("FieldNoteBook GameObject not found in the scene");
         }
 
         if (specDataHandler == null)
@@ -172,6 +187,17 @@ public class FieldNoteHandler : MonoBehaviour
         if (specResultsText == null)
         {
             Debug.LogError("SpecResultsText reference is not set. Please assign the TextMeshProUGUI component in the Spec Results Placeholder.");
+        }
+        
+        // Verify reference for significance indicator
+        if (sigIndicator == null)
+        {
+            Debug.LogError("SigIndicator reference is not set. Please assign the TextMeshProUGUI component for the significance indicator.");
+        }
+        else
+        {
+            // Set default color to white
+            sigIndicator.color = Color.white;
         }
         
         // Verify references for Field Note Info
@@ -259,22 +285,96 @@ public class FieldNoteHandler : MonoBehaviour
             Debug.LogError("NoteCard prefab reference is not set. Please assign it in the inspector.");
         }
         
-        // Verify reference for VirtualizedScrollRectList
-        if (virtualizedScrollRectList == null)
-        {
-            Debug.LogError("VirtualizedScrollRectList reference is not set. Please assign it in the inspector.");
-        }
-        
         // Initialize the field note data
         currentFieldNoteData = new FieldNoteData();
+        
         // Register event listeners for buttons and sliders
         RegisterEventListeners();
-        
-        // Register virtualized list callbacks if the list exists
-        if (virtualizedScrollRectList != null)
+    }
+
+    // Find the Content GameObject where note cards will be spawned
+    private void FindContentGameObject()
+    {
+        // Try to find the Content GameObject using the path from the hierarchy
+        GameObject fieldNoteBook = GameObject.Find("FieldNoteBook");
+        if (fieldNoteBook != null)
         {
-            RegisterVirtualizedListCallbacks();
+            // Look specifically for a GameObject named exactly "Content", not just containing "Content"
+            Transform contentTransform = FindExactChildRecursively(fieldNoteBook.transform, "Content");
+            if (contentTransform != null)
+            {
+                contentGameObject = contentTransform.gameObject;
+                Debug.Log("Content GameObject found successfully: " + contentGameObject.name);
+            }
+            else
+            {
+                Debug.LogError("Content GameObject not found under FieldNoteBook");
+            }
         }
+        else
+        {
+            Debug.LogError("FieldNoteBook GameObject not found in the scene");
+        }
+    }
+
+    // Helper method to find a child by exact name recursively through the hierarchy
+    private Transform FindExactChildRecursively(Transform parent, string exactChildName)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == exactChildName)
+            {
+                return child;
+            }
+            
+            Transform found = FindExactChildRecursively(child, exactChildName);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+        
+        return null;
+    }
+
+    // Initialize thresholds based on the reference table
+    private void InitializeThresholds()
+    {
+        // Add threshold values from the reference table
+        // Format: compound name, threshold value, is significant when greater than threshold (true) or less than threshold (false)
+        thresholds.Add("SiO2", new Threshold(30.0f, false));  // <30 is significant
+        thresholds.Add("TiO2", new Threshold(10.0f, true));   // >10 is significant
+        thresholds.Add("Al2O3", new Threshold(25.0f, true));  // >25 is significant
+        thresholds.Add("FeO", new Threshold(20.0f, true));    // >20 is significant
+        thresholds.Add("MnO", new Threshold(0.5f, true));     // >0.5 is significant
+        thresholds.Add("MgO", new Threshold(10.0f, true));    // >10 is significant
+        thresholds.Add("CaO", new Threshold(5.0f, false));    // <5 is significant
+        thresholds.Add("K2O", new Threshold(1.0f, true));     // >1 is significant
+        thresholds.Add("P2O3", new Threshold(1.0f, true));    // >1 is significant
+        thresholds.Add("other", new Threshold(50.0f, true));  // >50 is significant
+    }
+
+    // Check if a compound value is scientifically significant
+    private bool IsScientificallySignificant(string compound, float value)
+    {
+        // Check if the compound exists in our thresholds dictionary
+        if (thresholds.TryGetValue(compound, out Threshold threshold))
+        {
+            // Check if the value exceeds the threshold in the specified direction
+            if (threshold.isGreaterThan)
+            {
+                // For "greater than" thresholds, value is significant if greater than threshold
+                return value > threshold.value;
+            }
+            else
+            {
+                // For "less than" thresholds, value is significant if less than threshold
+                return value < threshold.value;
+            }
+        }
+        
+        // If compound not found in thresholds, not significant
+        return false;
     }
     
     void Update()
@@ -536,6 +636,15 @@ public class FieldNoteHandler : MonoBehaviour
         
         try
         {
+            // Reset significance indicator to white (default state)
+            if (sigIndicator != null)
+            {
+                sigIndicator.color = Color.white;
+            }
+            
+            // Flag to track if any value is scientifically significant
+            bool hasSignificantValue = false;
+            
             // Get the current EVA number and convert to eva1/eva2 format
             int evaNumber = evaNumberHandler.getEVANumber();
             string evaKey = "eva" + evaNumber;
@@ -597,15 +706,24 @@ public class FieldNoteHandler : MonoBehaviour
             // Format each row with the two columns
             for (int i = 0; i < halfLength; i++)
             {
-                // Store mineral composition data
+                // Get left column data
                 float leftValue = specDataHandler.GetCompoundData(evaKey, leftColumnCompounds[i]);
                 currentFieldNoteData.mineralComposition[leftColumnCompounds[i]] = leftValue;
                 localMineralComposition[leftColumnCompounds[i]] = leftValue;
                 
-                string leftColumn = $"{leftColumnCompounds[i]}: {leftValue:F2}%";
+                // Check if the left value is scientifically significant
+                bool leftSignificant = IsScientificallySignificant(leftColumnCompounds[i], leftValue);
+                if (leftSignificant)
+                {
+                    hasSignificantValue = true;
+                }
                 
-                // Add padding to make columns align
-                leftColumn = leftColumn.PadRight(16);
+                // Format the left column with or without bold/underline formatting
+                string leftColumnText = leftColumnCompounds[i] + ": " + leftValue.ToString("F2") + "%";
+                string leftColumn = leftSignificant ? $"<b><u>{leftColumnText}</u></b>" : leftColumnText;
+                
+                // Add padding to make columns align (consider the rich text tags in the padding calculation)
+                string leftPadding = new string(' ', Math.Max(1, 16 - leftColumnText.Length));
                 
                 // Add right column if available
                 if (i < rightColumnCompounds.Length)
@@ -614,8 +732,18 @@ public class FieldNoteHandler : MonoBehaviour
                     currentFieldNoteData.mineralComposition[rightColumnCompounds[i]] = rightValue;
                     localMineralComposition[rightColumnCompounds[i]] = rightValue;
                     
-                    string rightColumn = $"{rightColumnCompounds[i]}: {rightValue:F2}%";
-                    results += leftColumn + rightColumn + "\n";
+                    // Check if the right value is scientifically significant
+                    bool rightSignificant = IsScientificallySignificant(rightColumnCompounds[i], rightValue);
+                    if (rightSignificant)
+                    {
+                        hasSignificantValue = true;
+                    }
+                    
+                    // Format the right column with or without bold/underline formatting
+                    string rightColumnText = rightColumnCompounds[i] + ": " + rightValue.ToString("F2") + "%";
+                    string rightColumn = rightSignificant ? $"<b><u>{rightColumnText}</u></b>" : rightColumnText;
+                    
+                    results += leftColumn + leftPadding + rightColumn + "\n";
                 }
                 else
                 {
@@ -625,6 +753,12 @@ public class FieldNoteHandler : MonoBehaviour
             
             // Update the text component
             specResultsText.text = results;
+            
+            // Update significance indicator color if there are significant values
+            if (hasSignificantValue && sigIndicator != null)
+            {
+                sigIndicator.color = Color.yellow;
+            }
             
             Debug.Log("Spec Results updated based on data change");
         }
@@ -638,22 +772,57 @@ public class FieldNoteHandler : MonoBehaviour
     private void OnCompleteButtonClicked()
     {
         Debug.Log("Complete button clicked");
+        
+        // Ensure edit mode is disabled
+        isEditModeEnabled = false;
+        
+        // Update visual state of edit button to appear toggled off
+        if (editButton != null)
+        {
+            // Force the edit button to update its visual state to match the disabled edit mode
+            editButton.ForceSetToggled(false);
+        }
+        
         GenerateNoteCard();
     }
 
     private void GenerateNoteCard()
     {
-        // Check if we have the virtualized list reference
-        if (virtualizedScrollRectList == null)
+        // Check if we have the Content GameObject reference
+        if (contentGameObject == null)
         {
-            Debug.LogError("Cannot generate NoteCard: Missing VirtualizedScrollRectList reference");
+            // Try to find it again in case it wasn't found during Start
+            FindContentGameObject();
+            
+            if (contentGameObject == null)
+            {
+                Debug.LogError("Cannot generate NoteCard: Content GameObject not found");
+                return;
+            }
+        }
+        
+        // Check if we have the NoteCard prefab
+        if (noteCardPrefab == null)
+        {
+            Debug.LogError("Cannot generate NoteCard: NoteCard prefab is missing");
             return;
         }
         
         try
         {
+            // Check if any mineral composition values are scientifically significant
+            bool hasSignificantValue = false;
+            foreach (KeyValuePair<string, float> kvp in currentFieldNoteData.mineralComposition)
+            {
+                if (IsScientificallySignificant(kvp.Key, kvp.Value))
+                {
+                    hasSignificantValue = true;
+                    break;
+                }
+            }
+            
             // Store the current field note data in the list
-            noteCards.Add(new FieldNoteData
+            FieldNoteData newNoteData = new FieldNoteData
             {
                 rockType = currentFieldNoteData.rockType,
                 grainSize = currentFieldNoteData.grainSize,
@@ -665,22 +834,45 @@ public class FieldNoteHandler : MonoBehaviour
                 dateTime = currentFieldNoteData.dateTime,
                 evaTimeSeconds = currentFieldNoteData.evaTimeSeconds,
                 location = currentFieldNoteData.location,
+                isScientificallySignificant = hasSignificantValue,
                 fieldNoteObject = gameObject
-            });
+            };
             
-            // Update the virtualized list item count
-            virtualizedScrollRectList.SetItemCount(noteCards.Count);
+            // Add to the list for reference
+            noteCards.Add(newNoteData);
             
-            // Register callbacks if they haven't been registered yet
-            RegisterVirtualizedListCallbacks();
+            // Instantiate the NoteCard prefab as a child of the Content GameObject
+            GameObject noteCardInstance = Instantiate(noteCardPrefab, contentGameObject.transform);
             
-            Debug.Log($"NoteCard data added to list. Total cards: {noteCards.Count}");
+            // Find the NoteCardInformation component on the instantiated prefab
+            NoteCardInformation noteCardInfo = noteCardInstance.GetComponent<NoteCardInformation>();
+            if (noteCardInfo == null)
+            {
+                Debug.LogError("NoteCardInformation component missing on the instantiated prefab");
+                return;
+            }
+            
+            // Format location for display
+            string formattedLocation = FormatLocation(newNoteData.location);
+            
+            // Set the data on the note card, including the scientific significance flag
+            noteCardInfo.SetCardData(
+                newNoteData.dateTime,
+                formattedLocation,
+                newNoteData.sampleName,
+                newNoteData.rockType,
+                gameObject,
+                newNoteData.isScientificallySignificant
+            );
+            
+            Debug.Log("NoteCard successfully instantiated as a child of Content" + 
+                    (newNoteData.isScientificallySignificant ? " (SCIENTIFICALLY SIGNIFICANT)" : ""));
             
             // Disable edit mode
             isEditModeEnabled = false;
             Debug.Log("Edit mode is now disabled");
             
-            // Disable Game object when completed
+            // Disable this GameObject when completed
             gameObject.SetActive(false);
             Debug.Log("Field Note GameObject disabled");
         }
@@ -688,74 +880,6 @@ public class FieldNoteHandler : MonoBehaviour
         {
             Debug.LogError("Error generating NoteCard: " + e.Message);
         }
-    }
-
-    // Register callbacks for the virtualized list
-    private void RegisterVirtualizedListCallbacks()
-    {
-        // Only register callbacks once
-        if (!callbacksRegistered)
-        {
-            virtualizedScrollRectList.OnVisible += OnNoteCardVisible;
-            virtualizedScrollRectList.OnInvisible += OnNoteCardInvisible;
-            callbacksRegistered = true;
-            Debug.Log("Virtualized list callbacks registered");
-        }
-    }
-
-    // Callback methods for the virtualized list - FIXED to match Action<GameObject, int>
-    private void OnNoteCardVisible(GameObject go, int index)
-    {
-        // First reset the RectTransform position to ensure proper centering
-        RectTransform rectTransform = go.GetComponent<RectTransform>();
-        Vector3 currentPos = rectTransform.localPosition;
-        rectTransform.localPosition = new Vector3(0, currentPos.y, 0);
-
-        // Make sure the index is valid
-        if (index < 0 || index >= noteCards.Count)
-        {
-            Debug.LogWarning($"Invalid index {index} for noteCards list with count {noteCards.Count}");
-            return;
-        }
-        
-        try
-        {
-            // Get the note card data for this index
-            FieldNoteData data = noteCards[index];
-            
-            // Find the NoteCardInformation component on this GameObject
-            NoteCardInformation noteCardInfo = go.GetComponent<NoteCardInformation>();
-            if (noteCardInfo == null)
-            {
-                Debug.LogError($"NoteCardInformation component missing on prefab at index {index}");
-                return;
-            }
-            
-            // Format location for display
-            string formattedLocation = FormatLocation(data.location);
-            
-            // Set the data on the note card, passing the stored field note GameObject
-            noteCardInfo.SetCardData(
-                data.dateTime,
-                formattedLocation,
-                data.sampleName,
-                data.rockType,
-                data.fieldNoteObject // Pass the stored field note reference
-            );
-            
-            Debug.Log($"NoteCard at index {index} populated with data");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error setting up note card at index {index}: {e.Message}");
-        }
-    }
-
-    // Keep parameter order as GameObject, int to match delegate
-    private void OnNoteCardInvisible(GameObject go, int index)
-    {
-        // Clean up any resources if needed
-        Debug.Log($"NoteCard at index {index} is now invisible");
     }
 
     // Helper method to find a child by name recursively through the hierarchy
@@ -782,7 +906,6 @@ public class FieldNoteHandler : MonoBehaviour
     {
         return $"X:{location.x:F1} Y:{location.y:F1} H:{location.z:F0}°";
     }
-
     
     public void UpdateFieldNoteInfo()
     {
@@ -830,7 +953,7 @@ public class FieldNoteHandler : MonoBehaviour
                 missionTime.Seconds);
             
             // Default location string
-            string locationString = "location: ";
+            string locationString = "location: \n";
             
             // Check if we have valid EVA number
             if (evaNumber != 1 && evaNumber != 2)

@@ -12,6 +12,7 @@ public class ProcedureChecklistManager : MonoBehaviour
     [SerializeField] private PressableButton[] checklistButtons;
     [SerializeField] private PressableButton nextButton;
     [SerializeField] private PressableButton backButton; // Added back button reference
+    [SerializeField] private StepBoxController stepBoxController; // Reference to the StepBoxController
     
     private ProcedureStep currentStep = ProcedureStep.StartVoiceRecording;
     
@@ -22,6 +23,7 @@ public class ProcedureChecklistManager : MonoBehaviour
     {
         // Initialize UI state
         UpdateChecklistUI();
+        currentStep = ProcedureStep.StartVoiceRecording;
         
         // Set up button event listeners
         for (int i = 0; i < checklistButtons.Length; i++)
@@ -50,8 +52,57 @@ public class ProcedureChecklistManager : MonoBehaviour
         // Only allow clicking the button for the current step
         if ((int)currentStep == buttonIndex)
         {
-            GoToNextStep();
+            // Check if this is the last button in the array
+            if (buttonIndex == checklistButtons.Length - 1)
+            {
+                // Start the coroutine to complete the checklist
+                StartCoroutine(ResetAfterCompletion());
+            }
+            else
+            {
+                GoToNextStep();
+            }
         }
+    }
+    
+    private IEnumerator ResetAfterCompletion()
+    {
+        // Wait a short time to allow the Completed message to be seen
+        yield return new WaitForSeconds(3.0f);
+
+        // 1. Reset step box to step 0
+        if (stepBoxController != null)
+        {
+            stepBoxController.ShowDefaultStep();
+        }
+        else
+        {
+            Debug.LogWarning("StepBoxController reference is missing in ProcedureChecklistManager");
+        }
+        
+        // 2. Reset all checklist buttons visual state
+        ResetChecklistButtons();
+        
+        // 3. Deactivate the checklist GameObject
+        gameObject.SetActive(false);
+    }
+    
+    private void ResetChecklistButtons()
+    {
+        // Reset the state of all buttons
+        foreach (PressableButton button in checklistButtons)
+        {
+            // Use the appropriate method to untoggle based on your button implementation
+            // For MRTK3 PressableButton, we would typically reset the visual state
+            StatefulInteractable statefulInteractable = button.GetComponent<StatefulInteractable>();
+            if (statefulInteractable != null)
+            {
+                statefulInteractable.ForceSetToggled(false);
+            }
+        }
+        
+        // Reset the current step to the beginning
+        currentStep = ProcedureStep.StartVoiceRecording;
     }
     
     public void GoToNextStep()
@@ -97,5 +148,19 @@ public class ProcedureChecklistManager : MonoBehaviour
     {
         // Notify listeners about the step change
         OnStepChanged?.Invoke(currentStep);
+    }
+
+    // Add this OnEnable method to your ProcedureChecklistManager.cs script
+
+    private void OnEnable()
+    {
+        // Every time this GameObject is activated, reset to the first step
+        currentStep = ProcedureStep.StartVoiceRecording;
+        
+        // Update UI
+        UpdateChecklistUI();
+        
+        // Trigger the step changed event to update the StepBoxController
+        TriggerStepChanged();
     }
 }
