@@ -22897,7 +22897,7 @@ RectTransform:
   m_GameObject: {fileID: 8038520883390224771}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.003524}
-  m_LocalScale: {x: 0.0023019149, y: 0.002301915, z: 0.0023019149}
+  m_LocalScale: {x: 0.00175, y: 0.00175, z: 0.00175}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2993723133702573611}
@@ -22985,7 +22985,6 @@ MonoBehaviour:
   editButton: {fileID: 5654679167640845829}
   completeButton: {fileID: 4349661633817735341}
   noteCardPrefab: {fileID: 3194198485663764869, guid: 603419fbe1408924bb6076add8d273a6, type: 3}
-  contentGameObject: {fileID: 0}
 --- !u!114 &6147301821508813273
 MonoBehaviour:
   m_ObjectHideFlags: 0
