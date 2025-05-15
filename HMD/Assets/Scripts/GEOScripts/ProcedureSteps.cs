@@ -11,8 +11,8 @@ public enum ProcedureStep
 {
     StartVoiceRecording,
     SetupFieldNote,
-    ScanSample,
     TakePhoto,
+    ScanSample, 
     FinishFieldNote,
     Complete,
     Completed

@@ -11,25 +11,79 @@ public class StepBoxController : MonoBehaviour
 {
     [SerializeField] private TextMeshPro stepInstructionText;
     
+    // Direct reference to the checklist manager, assignable in inspector
+    [SerializeField] private ProcedureChecklistManager checklistManager;
+    
     // Flag to track if we're in Step 0 (default state)
     private bool isInDefaultStep = true;
     
     private void Start()
     {
-        // Initialize with Step 0
+        // Initialize with default step
         ShowDefaultStep();
+        
+        // Validate the checklist manager reference
+        if (checklistManager == null)
+        {
+            Debug.LogError("StepBoxController: ProcedureChecklistManager reference not set in inspector!");
+        }
     }
     
     private void OnEnable()
     {
         // Subscribe to step change events
         ProcedureChecklistManager.OnStepChanged += UpdateStepInstructions;
+        
+        // Subscribe to the scan step significance update event
+        ProcedureChecklistManager.OnScanStepSignificanceUpdate += UpdateScanStepWithSignificance;
     }
     
     private void OnDisable()
     {
-        // Unsubscribe from step change events
+        // Unsubscribe from events
         ProcedureChecklistManager.OnStepChanged -= UpdateStepInstructions;
+        ProcedureChecklistManager.OnScanStepSignificanceUpdate -= UpdateScanStepWithSignificance;
+    }
+    
+    /// <summary>
+    /// Updates the scan step text with significance information
+    /// </summary>
+    private void UpdateScanStepWithSignificance(bool isSignificant)
+    {
+        Debug.Log("StepBoxController.UpdateScanStepWithSignificance event handler called. isSignificant: " + isSignificant);
+        Debug.Log("StepBoxController: checklistManager is null: " + (checklistManager == null));
+        
+        // Make sure we're still on the scan step and references are valid
+        if (checklistManager != null && 
+            checklistManager.IsScanCompleted() && 
+            stepInstructionText != null)
+        {
+            string stepNumber = "4"; // Updated step number for scan step (was 3, now 4)
+            string instruction;
+            
+            // Display different instructions based on significance
+            if (isSignificant)
+            {
+                instruction = "Step " + stepNumber + ": Sample Evaluation\n\n" +
+                            "• <b><u><color=#FFFF00>SCIENTIFICALLY SIGNIFICANT SAMPLE DETECTED</color></u></b>\n" +
+                            "• Analyze sample and complete field note\n" +
+                            "• Carefully collect and store sample\n" +
+                            "• Comm: \"Significant sample collected\"";
+            }
+            else
+            {
+                instruction = "Step " + stepNumber + ": Sample Evaluation\n\n" +
+                            "• <b><u>Sample is not scientifically significant</u></b>\n" +
+                            "• Analyze sample and complete field note\n" +
+                            "• Do not collect sample\n" +
+                            "• Comm: \"Sample not significant\"";
+            }
+            
+            // Update the text in the step box
+            stepInstructionText.text = instruction;
+            
+            Debug.Log($"StepBoxController: Updated scan step text with significance: {isSignificant}");
+        }
     }
     
     /// <summary>
@@ -43,7 +97,8 @@ public class StepBoxController : MonoBehaviour
         string instruction = "Ready to Begin\n\n" +
                           "1. Announce over comms:\n" +
                           "   • \"Arrived at site, beginning sampling\n" +
-                          "2. Click \"Start New Sample\" Button in Geo Hand Menu\n";
+                          "2. Raise right palm up to open Geo Hand Menu\n" +
+                          "   • Click \"Start New Sample \" Button";
         
         // Update the text in the step box
         if (stepInstructionText != null)
@@ -64,45 +119,55 @@ public class StepBoxController : MonoBehaviour
         {
             case ProcedureStep.StartVoiceRecording:
                 instruction = "Step " + stepNumber + ": Start Voice Recording\n\n" +
-                            "• Press the voice recording button on task list to start voice recording\n" + 
-                            "• Voice all thoughts out loud during sampling";
+                            "• Press voice recording button on task list to start \n" + 
+                            "• Voice all thoughts and analysis outloud";
                 break;
             case ProcedureStep.SetupFieldNote:
-                instruction = "Step " + stepNumber + ": Set Up Field Note\n\n" +
-                            "• Orientate fieldnote and notebook out of by looking left \n" +
-                            "• Toggle on the edit switch on the field note";
-                break;
-            case ProcedureStep.ScanSample:
-                instruction = "Step " + stepNumber + ": Scan the Sample\n\n" +
-                            "• Press and hold trigger to start XRF scan\n" +
-                            "• Hold steady until confirmation beep\n" +
-                            "• Comm: \"Scan Complete, PR Verify data recieved\"";
+                instruction = "Step " + stepNumber + ": Set Up Field Note\n\n" +   
+                            "• Grab Titles to reposition Field Notes/Checklist\n" +  
+                            "• Organize and clear workspace\n" +
+                            "• <u> Toggle field note edit switch on </u>";
                 break;
             case ProcedureStep.TakePhoto:    
                 instruction = "Step " + stepNumber + ": Take a Photo\n\n" +
-                            "• Set up diffused lighting\n" +
-                            "• Clean camera lens\n" +
-                            "• Position camera above sample\n" +
-                            "• Capture image";
+                            "• Ensure sample is completely in view\n" +
+                            "• Capture an image by saying: \n" +
+                            "- \"Take Geological Photo\" \n" +
+                            "• Check photo on Field Note, retake if needed";
+
+                break;
+            case ProcedureStep.ScanSample:
+                // Only show the updated text if the scan has already been completed
+                if (checklistManager != null && checklistManager.IsScanCompleted())
+                {
+                    // Call the update method with the current significance status
+                    UpdateScanStepWithSignificance(checklistManager.GetSampleSignificanceStatus());
+                    return; // Return early since we're handling the text update in the other method
+                }
+                else
+                {
+                    // Initial scan step text before scan is completed
+                    instruction = "Step " + stepNumber + ": Perform XRF Scan\n\n" +
+                                "• Press and hold trigger to start XRF scan\n" +
+                                "• Aim close to sample until confrimation beep\n" +
+                                "• Release trigger and check readings on field note\n";
+                }
                 break;
             case ProcedureStep.FinishFieldNote:
                 instruction = "Step " + stepNumber + ": Finish Field Note\n\n" +
-                            "• Edit all required fields and sliders\n" + 
-                            "• Check fieldnote Significance Indicator (!)\n" +
-                            "• Collect sample if indicator (!) is yellow\n" +
+                            "• Ensure fieldnote is filled out\n" + 
                             "• Press Complete button to save fieldnote";
                 break;
             case ProcedureStep.Complete:
                 instruction = "Step " + stepNumber + ": Complete Process\n\n" +
-                            "• Drop pin on sample\n" +
                             "• Announce over comms:\n" +
                             " - Sampling complete, PR verify receipt of data\n" + 
-                            " - Beginning nav to next location\n";
+                            " - Beginning nav to next location\n"+
+                            "• Pin automatically dropped\n";
                 break;
             case ProcedureStep.Completed:
                 instruction = "Procedure Completed!\n\n" +
-                            "• All data saved\n" +
-                            "• Recording stored";
+                            "• All data saved in field notebook\n";
                 break;
         }
         
