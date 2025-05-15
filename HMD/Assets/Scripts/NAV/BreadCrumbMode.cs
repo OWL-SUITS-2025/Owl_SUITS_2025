@@ -15,6 +15,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
         // Used for highlighting when a mode is currently activated
         [SerializeField] private GameObject breadCrumbBackplate;
         public TextMeshPro breadCrumbStatusText;
+        public IMUDataHandler imuDataHandler;
 
         private bool isBreadcrumbModeActive = false;
         private int breadcrumbCount = 1;
@@ -64,12 +65,17 @@ namespace Microsoft.MixedReality.Toolkit.UI
                     // Drop a breadcrumb at the current position
                     GameObject breadcrumb = Instantiate(breadcrumbPrefab, Camera.main.transform.position, Quaternion.identity);
 
+
                     // Assign the "Breadcrumb" tag to the dropped breadcrumb prefab
                     breadcrumb.tag = "Breadcrumb";
 
                     // Get the TMP_Text component from the breadcrumb prefab
                     TMP_Text labelText = breadcrumb.GetComponentInChildren<TMP_Text>();
                     labelText.text = breadcrumbCount.ToString();
+
+                    float posx = imuDataHandler.GetPosx("eva1");
+                    float posy = imuDataHandler.GetPosy("eva1");
+                    PinRegistry.AddPin(new PinData("breadcrumb", posx, posy, breadcrumbCount.ToString()));
 
                     // Start a coroutine to update the distance and rotation continuously
                     StartCoroutine(UpdateBreadcrumbState(breadcrumb.transform, labelText));

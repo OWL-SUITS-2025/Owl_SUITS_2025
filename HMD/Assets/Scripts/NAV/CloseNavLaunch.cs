@@ -24,7 +24,6 @@ public class CloseNavLaunch : MonoBehaviour
         {
             // Activate the GameObject
             objectToDeactivate.SetActive(true);
-            Debug.Log("IDKDKDKKDKKD");
         }
         else
         {
