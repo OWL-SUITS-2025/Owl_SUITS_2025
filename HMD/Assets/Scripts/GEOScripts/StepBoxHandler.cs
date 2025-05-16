@@ -124,7 +124,7 @@ public class StepBoxController : MonoBehaviour
                 break;
             case ProcedureStep.SetupFieldNote:
                 instruction = "Step " + stepNumber + ": Set Up Field Note\n\n" +   
-                            "• Grab Titles to reposition Field Notes/Checklist\n" +  
+                            "• Grab Field Notes/Checklist by title to reposition\n" +  
                             "• Organize and clear workspace\n" +
                             "• <u> Toggle field note edit switch on </u>";
                 break;
