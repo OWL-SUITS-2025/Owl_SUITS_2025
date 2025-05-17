@@ -167,7 +167,7 @@ public class PinPointButton : MonoBehaviour
         }
         float posx = imuDataHandler.GetPosx("eva1");
         float posy = imuDataHandler.GetPosy("eva1");
-        PinRegistry.AddPin(new PinData("pin",posx, posy, labelText, tags, clip));
+        PinRegistry.AddPin(new PinData(posx, posy, labelText, tags, clip));
     }
 
     public void OnGeneralPinButtonPressed()
@@ -175,7 +175,7 @@ public class PinPointButton : MonoBehaviour
         isGeneralPinButtonPressed = true;
         isHazardPinButtonPressed = false;
         isSamplePinButtonPressed = false;
-        PinRegistry.AddPin(new PinData("pin", -5879, -10000, labelText, "general", null));
+        PinRegistry.AddPin(new PinData(-5879, -10000, labelText, "general", null));
         HighlightButton(generalPinBackplate);
         UnhighlightButton(hazardPinBackplate);
         UnhighlightButton(samplePinBackplate);

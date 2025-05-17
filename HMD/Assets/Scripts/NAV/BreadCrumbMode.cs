@@ -75,7 +75,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
 
                     float posx = imuDataHandler.GetPosx("eva1");
                     float posy = imuDataHandler.GetPosy("eva1");
-                    PinRegistry.AddPin(new PinData("breadcrumb", posx, posy, breadcrumbCount.ToString()));
+                    // PinRegistry.AddPin(new PinData("breadcrumb", posx, posy, breadcrumbCount.ToString()));
 
                     // Start a coroutine to update the distance and rotation continuously
                     StartCoroutine(UpdateBreadcrumbState(breadcrumb.transform, labelText));

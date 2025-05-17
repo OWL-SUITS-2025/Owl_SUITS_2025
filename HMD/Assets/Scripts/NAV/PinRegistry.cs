@@ -9,17 +9,14 @@ public struct PinData
     public string tags;
     public string name;
     public AudioClip clip;
-    public string type;
+   
 
 
-    public PinData(string ty, float x, float y, string n, string t, AudioClip c)
+    public PinData(float x, float y, string n, string t, AudioClip c)
     {
-        mapX = x; mapY = y; tags = t; name = n; clip = c; type = ty;
+        mapX = x; mapY = y; tags = t; name = n; clip = c; 
     }
-    public PinData(string ty, float x, float y, string n)
-    {
-        mapX = x; mapY = y; tags = ""; name = n; clip = null; type = ty;
-    }
+   
    
 }
 

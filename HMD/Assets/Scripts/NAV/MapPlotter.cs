@@ -2,85 +2,58 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// Attach this to the same GameObject that shows the 2-D map
 public class MapPinOverlay : MonoBehaviour
 {
-    [Header("Scene references")]
-    [SerializeField] private RectTransform mapRect;   // drag the map quad/image
-    [SerializeField] private GameObject pinPrefab; // your UX-icon prefab
+    [Header("Map settings")]
+    [SerializeField] RectTransform mapRect;
+    [SerializeField] float xMin=-9940f, xMax=-5760f, yMin=-10070f, yMax=-5550f;
 
-    [Header("Refresh")]
-    [SerializeField] private float refreshInterval = 1f;
+    [Header("Pin")]
+    [SerializeField] GameObject pinPrefab;
+    [SerializeField] float refreshInterval = 1f;
 
-    /* ─── real-world coordinate extents you gave ─── */
-    const float RX_MIN = -9940f, RX_MAX = -5760f;   // X left → right
-    const float RY_MAX = -5550f, RY_MIN = -10070f;  // Y top  → bottom
-
-    /* one icon per registry index */
-    readonly Dictionary<int, GameObject> pinInstances = new();
+    Dictionary<int, GameObject> pinInstances = new Dictionary<int, GameObject>();
 
     void OnEnable() => StartCoroutine(UpdateLoop());
     void OnDisable() => StopAllCoroutines();
 
     IEnumerator UpdateLoop()
     {
-        var wait = new WaitForSeconds(refreshInterval);
-
         while (true)
         {
-            SyncPinsWithRegistry();
-            yield return wait;
+            UpdatePins();
+            yield return new WaitForSeconds(refreshInterval);
         }
     }
 
-    /* ------------------------------------------------------------------ */
-    void SyncPinsWithRegistry()
+    void UpdatePins()
     {
-        int count = PinRegistry.Pins.Count;                          // how many real pins? :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
-
-        /* ----- 1. add new ones ----- */
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < PinRegistry.Pins.Count; i++)
         {
-            if (pinInstances.ContainsKey(i) ) continue;               // already have icon
-
-            // compute local pos once – pins never move after spawn
-            Vector2 realXY = new(PinRegistry.Pins[i].mapX,
-                                 PinRegistry.Pins[i].mapY);
-            Vector3 localPos = RealToLocal(realXY);
-
-            if (PinRegistry.Pins[i].type == "pin")
+            // spawn if needed
+            if (!pinInstances.TryGetValue(i, out GameObject pin))
             {
-                GameObject pinGO = Instantiate(pinPrefab, localPos, Quaternion.Euler(0, 90, 0));
-                pinInstances.Add(i, pinGO);
+                pin = Instantiate(pinPrefab, mapRect);
+                pinInstances.Add(i, pin);
             }
-            
+
+            // get real coords
+            var data = PinRegistry.Pins[i];
+            Vector2 real = new Vector2(data.mapX, data.mapY);
+
+            // compute normalized
+            float u = Mathf.InverseLerp(xMin, xMax, real.x);
+            float v = Mathf.InverseLerp(yMin, yMax, real.y);
+
+            // map to UI pixels (pivot = bottom-left)
+            float px = u * mapRect.rect.width;
+            float py = v * mapRect.rect.height;
+
+            // if pivot is center, uncomment next two lines:
+            // px -= mapRect.rect.width  * 0.5f;
+            // py -= mapRect.rect.height * 0.5f;
+
+            pin.GetComponent<RectTransform>().anchoredPosition = new Vector2(px, py);
         }
-
-        /* ----- 2. remove stale ones (if pins got deleted) ----- */
-        if (pinInstances.Count > count)
-        {
-            List<int> toRemove = new();
-            foreach (var kvp in pinInstances)
-                if (kvp.Key >= count)
-                    toRemove.Add(kvp.Key);
-
-            foreach (int key in toRemove)
-            {
-                Destroy(pinInstances[key]);
-                pinInstances.Remove(key);
-            }
-        }
-    }
-
-    /* convert metres in the real frame → localPosition under mapRect */
-    Vector3 RealToLocal(Vector2 realXY)
-    {
-        float nx = Mathf.InverseLerp(RX_MIN, RX_MAX, realXY.x); // 0-1 across X
-        float ny = Mathf.InverseLerp(RY_MAX, RY_MIN, realXY.y); // flip Y axis
-
-        float px = nx * mapRect.rect.width;
-        float py = ny * mapRect.rect.height;
-
-        return new Vector3(px, py, -0.0003385376f);  // Z=0 keeps icon flush with map
     }
 }
