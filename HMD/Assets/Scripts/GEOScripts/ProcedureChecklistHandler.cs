@@ -11,51 +11,116 @@ public class ProcedureChecklistManager : MonoBehaviour
 {
     [SerializeField] private PressableButton[] checklistButtons;
     [SerializeField] private PressableButton nextButton;
-    [SerializeField] private PressableButton backButton; // Added back button reference
-    [SerializeField] private StepBoxController stepBoxController; // Reference to the StepBoxController
-    
+    [SerializeField] private PressableButton backButton; 
+    [SerializeField] private StepBoxController stepBoxController; 
+
     private ProcedureStep currentStep = ProcedureStep.StartVoiceRecording;
-    
-    // Event that will be triggered when the step changes
     public static event Action<ProcedureStep> OnStepChanged;
     
+    // New event for when scan step needs to be updated with significance info
+    public static event Action<bool> OnScanStepSignificanceUpdate;
+    
+    private FieldNoteHandler activeFieldNoteHandler;
+    
+    // Track whether scan is completed for the current step
+    private bool isScanCompleted = false;
+    private bool isSampleSignificant = false;
+
+    public void SetActiveFieldNoteHandler(FieldNoteHandler handler)
+    {
+        activeFieldNoteHandler = handler;
+    }
+
+    public FieldNoteHandler GetActiveFieldNoteHandler()
+    {
+        return activeFieldNoteHandler;
+    }
+    
+    // Get scan completion status
+    public bool IsScanCompleted()
+    {
+        return isScanCompleted;
+    }
+    
+    // Get the significance status
+    public bool GetSampleSignificanceStatus()
+    {
+        return isSampleSignificant;
+    }
+
+    // Method to update the scan step text with significance information
+    public void UpdateScanStepText(bool isSignificant)
+    {
+
+        Debug.Log("ProcedureChecklistManager.UpdateScanStepText called. currentStep: " + currentStep + ", isSignificant: " + isSignificant);
+        // Only update if we're currently in the scan step
+        if (currentStep == ProcedureStep.ScanSample)
+        {
+            // Store the significance and scan completion status
+            isSampleSignificant = isSignificant;
+            isScanCompleted = true;
+            
+            // Trigger the event to update the step text
+            OnScanStepSignificanceUpdate?.Invoke(isSignificant);
+            
+            Debug.Log($"Scan completed. Sample is {(isSignificant ? "significant" : "not significant")}");
+        }
+    }
+
+    // Rest of your existing code remains unchanged...
     private void Start()
     {
         // Initialize UI state
         UpdateChecklistUI();
-        currentStep = ProcedureStep.StartVoiceRecording;
-        
-        // Set up button event listeners
+        currentStep = ProcedureStep.StartVoiceRecording; 
+
         for (int i = 0; i < checklistButtons.Length; i++)
         {
-            int buttonIndex = i; // Capture for lambda
-            checklistButtons[i].OnClicked.AddListener(() => OnChecklistButtonClicked(buttonIndex));
+            int buttonIndex = i; 
+            if (checklistButtons[i] != null) 
+            {
+                 checklistButtons[i].OnClicked.AddListener(() => OnChecklistButtonClicked(buttonIndex));
+            }
         }
-        
+
         if (nextButton != null)
         {
             nextButton.OnClicked.AddListener(GoToNextStep);
         }
-        
-        // Set up back button listener
         if (backButton != null)
         {
             backButton.OnClicked.AddListener(GoToPreviousStep);
         }
         
-        // Trigger initial step
-        TriggerStepChanged();
+        TriggerStepChanged(); 
     }
-    
+
     private void OnChecklistButtonClicked(int buttonIndex)
     {
-        // Only allow clicking the button for the current step
         if ((int)currentStep == buttonIndex)
         {
-            // Check if this is the last button in the array
-            if (buttonIndex == checklistButtons.Length - 1)
+            if (currentStep == ProcedureStep.StartVoiceRecording) 
             {
-                // Start the coroutine to complete the checklist
+                if (activeFieldNoteHandler != null)
+                {
+                    activeFieldNoteHandler.StartRecording();
+                }
+                else
+                {
+                    Debug.LogWarning("ProcedureChecklistManager: ActiveFieldNoteHandler is null. Cannot start recording.");
+                }
+            }
+            
+            if (currentStep == ProcedureStep.Complete) 
+            {
+                if (activeFieldNoteHandler != null)
+                {
+                    activeFieldNoteHandler.StopRecording();
+                }
+                else
+                {
+                    Debug.LogWarning("ProcedureChecklistManager: ActiveFieldNoteHandler is null. Cannot stop recording.");
+                }
                 StartCoroutine(ResetAfterCompletion());
             }
             else
@@ -67,100 +132,107 @@ public class ProcedureChecklistManager : MonoBehaviour
     
     private IEnumerator ResetAfterCompletion()
     {
-        // Wait a short time to allow the Completed message to be seen
+        currentStep = ProcedureStep.Completed; 
+        TriggerStepChanged(); 
+
         yield return new WaitForSeconds(3.0f);
 
-        // 1. Reset step box to step 0
         if (stepBoxController != null)
         {
             stepBoxController.ShowDefaultStep();
         }
-        else
-        {
-            Debug.LogWarning("StepBoxController reference is missing in ProcedureChecklistManager");
-        }
-        
-        // 2. Reset all checklist buttons visual state
         ResetChecklistButtons();
-        
-        // 3. Deactivate the checklist GameObject
         gameObject.SetActive(false);
+        activeFieldNoteHandler = null; 
     }
-    
+
     private void ResetChecklistButtons()
     {
-        // Reset the state of all buttons
         foreach (PressableButton button in checklistButtons)
         {
-            // Use the appropriate method to untoggle based on your button implementation
-            // For MRTK3 PressableButton, we would typically reset the visual state
-            StatefulInteractable statefulInteractable = button.GetComponent<StatefulInteractable>();
-            if (statefulInteractable != null)
+            if (button != null) 
             {
-                statefulInteractable.ForceSetToggled(false);
+                StatefulInteractable statefulInteractable = button.GetComponent<StatefulInteractable>();
+                if (statefulInteractable != null)
+                {
+                    statefulInteractable.ForceSetToggled(false);
+                }
             }
         }
         
-        // Reset the current step to the beginning
-        currentStep = ProcedureStep.StartVoiceRecording;
+        // Reset statuses when creating a new field note
+        isScanCompleted = false;
+        isSampleSignificant = false;
     }
     
     public void GoToNextStep()
     {
-        // Advance to the next step if we haven't completed all steps
-        if (currentStep < ProcedureStep.Completed)
+        if (currentStep < ProcedureStep.Complete) 
         {
             currentStep = (ProcedureStep)((int)currentStep + 1);
             UpdateChecklistUI();
             TriggerStepChanged();
         }
     }
-    
+
     public void GoToPreviousStep()
     {
-        // Go back to the previous step if we're not at the first step
-        if (currentStep > ProcedureStep.StartVoiceRecording)
+        if (currentStep == ProcedureStep.Completed) 
+        {
+            currentStep = ProcedureStep.Complete;
+            UpdateChecklistUI();
+            TriggerStepChanged();
+        }
+        else if (currentStep > ProcedureStep.StartVoiceRecording)
         {
             currentStep = (ProcedureStep)((int)currentStep - 1);
             UpdateChecklistUI();
             TriggerStepChanged();
         }
-        // If we're at the first step, do nothing as requested
     }
     
     private void UpdateChecklistUI()
     {
-        // Update which buttons are checked
         for (int i = 0; i < checklistButtons.Length; i++)
         {
-            // Set visual state of buttons based on current step
-            // This assumes you have a way to visually change the button state
-            // You may need to adjust this based on the specific implementation of your checklist
-            if (i < (int)currentStep)
+            if (checklistButtons[i] == null) continue; 
+
+            StatefulInteractable interactable = checklistButtons[i].GetComponent<StatefulInteractable>();
+            if (interactable != null)
             {
-                // Mark steps before current as completed
-                // Implementation depends on your UI setup
+                if (i < (int)currentStep)
+                {
+                    interactable.ForceSetToggled(true);
+                }
+                else
+                {
+                     interactable.ForceSetToggled(false);
+                }
             }
         }
+        if (nextButton != null) nextButton.gameObject.SetActive(currentStep < ProcedureStep.Complete);
+        if (backButton != null) backButton.gameObject.SetActive(currentStep > ProcedureStep.StartVoiceRecording && currentStep <= ProcedureStep.Completed);
     }
     
     private void TriggerStepChanged()
     {
-        // Notify listeners about the step change
         OnStepChanged?.Invoke(currentStep);
     }
 
-    // Add this OnEnable method to your ProcedureChecklistManager.cs script
-
     private void OnEnable()
     {
-        // Every time this GameObject is activated, reset to the first step
+        StopAllCoroutines();
+        StartCoroutine(InitializeChecklistOnEnable());
+    }
+
+    private IEnumerator InitializeChecklistOnEnable()
+    {
+        yield return null; 
+
         currentStep = ProcedureStep.StartVoiceRecording;
-        
-        // Update UI
+        isScanCompleted = false;
+        isSampleSignificant = false;
         UpdateChecklistUI();
-        
-        // Trigger the step changed event to update the StepBoxController
         TriggerStepChanged();
     }
 }
