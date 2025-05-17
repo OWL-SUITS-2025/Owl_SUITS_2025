@@ -9,7 +9,6 @@ public class ModeSwitching : MonoBehaviour
     public GameObject geoHUD;
     public GameObject navigationHUD;
     public GameObject ingressHUD;
-    public GameObject repairHUD;
 
     public TextMeshPro modeTextMeshPro;
 
@@ -25,7 +24,6 @@ public class ModeSwitching : MonoBehaviour
         geoHUD.SetActive(false);
         navigationHUD.SetActive(false);
         ingressHUD.SetActive(false);
-        repairHUD.SetActive(false);
     }
 
     public void ToggleEgressMode()
@@ -54,13 +52,6 @@ public class ModeSwitching : MonoBehaviour
         DisableAllHUDs();
         ingressHUD.SetActive(true);
         UpdateModeText("INGRESS IN PROGRESS", Color.magenta);
-    }
-
-    public void ToggleRepairMode()
-    {
-        DisableAllHUDs();
-        repairHUD.SetActive(true);
-        UpdateModeText("REPAIR IN PROGRESS", Color.cyan);
     }
 
     private void UpdateModeText(string modeText, Color textColor)
