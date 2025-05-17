@@ -1,5 +1,6 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Events;
 using UnityEngine.Windows.Speech;
 using TMPro;
@@ -24,20 +25,62 @@ public class PinPointButton : MonoBehaviour
     [SerializeField] private UnityEngine.XR.Interaction.Toolkit.Interactors.XRRayInteractor rayInteractor; // Drag the right hand or desired ray interactor here
 
     private int samplePinCount = 0;
+    private int generalPinCount = 0;
+    private int hazardPinCount = 0;
     private string labelText;
+
+    public TextMeshProUGUI namePin; // text box (name for pin)
 
     [Header("Events")]
     public UnityEvent onGeneralPinClick = new UnityEvent();
     public UnityEvent onHazardPinClick = new UnityEvent();
     public UnityEvent onSamplePinClick = new UnityEvent();
 
+    public IMUDataHandler imuDataHandler;
+
     private bool isGeneralPinButtonPressed = false;
     private bool isHazardPinButtonPressed = false;
     private bool isSamplePinButtonPressed = false;
     private const float VISIBILITY_DISTANCE = 50f;
+    private string tags;
 
     private KeywordRecognizer keywordRecognizer;
     private readonly string[] keywords = new string[] { "place pin" };
+
+    [SerializeField] TextMeshPro recordLabel; // “Record / Stop” text
+    [SerializeField] TextMeshPro plate;  // icon
+
+    bool recording;
+    string micDevice;
+    AudioClip clip;
+
+    public void OnRecordButtonPressed()
+    {
+        if (!recording) StartRec(); else StopRec();
+    }
+
+    void StartRec()
+    {
+        if (Microphone.devices.Length == 0)
+        {
+            Debug.LogWarning("No microphone found"); return;
+        }
+
+        micDevice = Microphone.devices[0];
+        clip = Microphone.Start(micDevice, false, 300, 44100); // up to 5 min
+        recording = true;
+
+        if (recordLabel) recordLabel.text = "Stop";
+    }
+
+    void StopRec()
+    {
+        Microphone.End(micDevice);
+        recording = false;
+
+        if (recordLabel) recordLabel.text = "Record";
+
+    }
 
     private void Start()
     {
@@ -77,23 +120,54 @@ public class PinPointButton : MonoBehaviour
     {
         if (isGeneralPinButtonPressed)
         {
-            labelText = "";
+            
             PlacePin(pinPointIconPrefab);
+            generalPinCount++;
+            if (namePin != null)
+            {
+                labelText = namePin.text;
+            }
+            else
+            {
+                labelText = $"General {generalPinCount}: ";
+            }
+            tags = "General";
             isGeneralPinButtonPressed = false;
         }
         else if (isHazardPinButtonPressed)
         {
-            labelText = "";
+            hazardPinCount++;
+            if (namePin != null)
+            {
+                labelText = namePin.text;
+            }
+            else
+            {
+                labelText = $"Hazard {hazardPinCount}: ";
+            }
+            tags = "Hazard";
             PlacePin(hazardPinPrefab);
             isHazardPinButtonPressed = false;
         }
         else if (isSamplePinButtonPressed)
         {
             samplePinCount++;
-            labelText = $"Sample {samplePinCount}: ";
+            if (namePin != null)
+            {
+                labelText = namePin.text;
+            }
+            else
+            {
+                labelText = $"Sample {samplePinCount}: ";
+            }
+           
+            tags = "Sample";
             PlacePin(samplePinPrefab);
             isSamplePinButtonPressed = false;
         }
+        float posx = imuDataHandler.GetPosx("eva1");
+        float posy = imuDataHandler.GetPosy("eva1");
+        PinRegistry.AddPin(new PinData(posx, posy, labelText, tags, clip));
     }
 
     public void OnGeneralPinButtonPressed()
@@ -101,6 +175,7 @@ public class PinPointButton : MonoBehaviour
         isGeneralPinButtonPressed = true;
         isHazardPinButtonPressed = false;
         isSamplePinButtonPressed = false;
+        PinRegistry.AddPin(new PinData(-5879, -10000, labelText, "general", null));
         HighlightButton(generalPinBackplate);
         UnhighlightButton(hazardPinBackplate);
         UnhighlightButton(samplePinBackplate);
@@ -131,6 +206,10 @@ public class PinPointButton : MonoBehaviour
         isGeneralPinButtonPressed = false;
         isHazardPinButtonPressed = false;
         isSamplePinButtonPressed = false;
+        if (recording)
+        {
+            StopRec();
+        }
         UnhighlightButton(samplePinBackplate);
         UnhighlightButton(generalPinBackplate);
         UnhighlightButton(hazardPinBackplate);
