@@ -12,10 +12,12 @@ namespace Microsoft.MixedReality.Toolkit.UI
         [SerializeField] private GameObject breadcrumbPrefab; // Drag your breadcrumb prefab here
         [SerializeField] private float distanceThreshold = 5f; // Adjust the distance threshold as needed
 
+        [SerializeField] private IMUDataHandler imuDataHandler;        // drag your IMUDataHandler
+        [SerializeField] private EVANumberHandler evaNumberHandler;
         // Used for highlighting when a mode is currently activated
         [SerializeField] private GameObject breadCrumbBackplate;
         public TextMeshPro breadCrumbStatusText;
-        public IMUDataHandler imuDataHandler;
+      
 
         private bool isBreadcrumbModeActive = false;
         private int breadcrumbCount = 1;
@@ -69,16 +71,26 @@ namespace Microsoft.MixedReality.Toolkit.UI
                     // Assign the "Breadcrumb" tag to the dropped breadcrumb prefab
                     breadcrumb.tag = "Breadcrumb";
 
-                    // Get the TMP_Text component from the breadcrumb prefab
-                    TMP_Text labelText = breadcrumb.GetComponentInChildren<TMP_Text>();
-                    labelText.text = breadcrumbCount.ToString();
+               
+                    /*
 
-                    float posx = imuDataHandler.GetPosx("eva1");
-                    float posy = imuDataHandler.GetPosy("eva1");
+                    int evaNumber = evaNumberHandler != null ? evaNumberHandler.getEVANumber() : 0;
+                    string evaKey = "eva" + evaNumber;
+
+                    // Only proceed if we have a valid EVA number
+                    if (evaNumber == 1 || evaNumber == 2)
+                    {
+                        float x = imuDataHandler.GetPosx(evaKey);          // or just imu.getX()
+                        float y = imuDataHandler.GetPosy(evaKey);          // same idea for Y
+                       
+
+                    }
+                    */
+
+                   
                     // PinRegistry.AddPin(new PinData("breadcrumb", posx, posy, breadcrumbCount.ToString()));
 
-                    // Start a coroutine to update the distance and rotation continuously
-                    StartCoroutine(UpdateBreadcrumbState(breadcrumb.transform, labelText));
+                   
 
                     breadcrumbCount++;
                     lastBreadcrumbPosition = Camera.main.transform.position;
@@ -106,23 +118,5 @@ namespace Microsoft.MixedReality.Toolkit.UI
             }
         }
 
-        private System.Collections.IEnumerator UpdateBreadcrumbState(Transform breadcrumbTransform, TMP_Text labelText)
-        {
-            Renderer breadcrumbRenderer = breadcrumbTransform.GetComponentInChildren<Renderer>();
-
-            while (true)
-            {
-                // Calculate the distance between the breadcrumb and the headset
-                float distance = Vector3.Distance(breadcrumbTransform.position, Camera.main.transform.position);
-
-                // Rotate the TMP object to face the camera
-                labelText.transform.rotation = Quaternion.LookRotation(labelText.transform.position - Camera.main.transform.position);
-
-                // Enable or disable the breadcrumb renderer based on the distance
-                breadcrumbRenderer.enabled = (distance <= VISIBILITY_DISTANCE);
-
-                yield return null;
-            }
-        }
     }
 }
