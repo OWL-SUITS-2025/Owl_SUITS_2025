@@ -140,8 +140,8 @@ public class PinPointButton : MonoBehaviour
     {
         if (isGeneralPinButtonPressed)
         {
-            
-            
+
+
             generalPinCount++;
             if (namePin != null)
             {
@@ -181,10 +181,14 @@ public class PinPointButton : MonoBehaviour
             {
                 labelText = $"Sample {samplePinCount}: ";
             }
-           
+
             tags = "Sample";
             PlacePin(samplePinPrefab);
             isSamplePinButtonPressed = false;
+        }
+        else
+        {
+            Debug.LogWarning("No pin type selected. Please select a pin type before placing a pin.");
         }
         
     }
@@ -248,48 +252,53 @@ public class PinPointButton : MonoBehaviour
 
     private void PlacePin(GameObject pinPrefab)
     {
-        if (rayInteractor == null)
-        {
-            Debug.LogWarning("Ray Interactor not assigned.");
-            return;
-        }
-
-        if (rayInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit))
+        Vector3 pinPosition;
+        bool validPosition = false;
+        
+        // Try using raycast first
+        if (rayInteractor != null && rayInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit))
         {
             Vector3 hitPoint = hit.point;
+            Debug.Log($"Hit point: {hitPoint}");
             float headsetHeight = Camera.main.transform.position.y;
-            Vector3 pinPosition = new Vector3(hitPoint.x, headsetHeight - 0.5f, hitPoint.z);
+            pinPosition = new Vector3(hitPoint.x, headsetHeight - 0.5f, hitPoint.z);
+            validPosition = true;
+        }
+        else
+        {
+            // Fallback: Place pin exactly at the head position
+            Debug.Log("Raycast failed. Using fallback to place pin at head position.");
+            
+            // Get the camera's position (user's head)
+            Vector3 headPosition = Camera.main.transform.position;
+            
+            // Use the exact head position
+            pinPosition = new Vector3(headPosition.x-0.5f, headPosition.y - 0.5f, headPosition.z);
+            validPosition = true;
+        }
 
-            if (!IsPinTooCloseToExistingPin(pinPosition))
+        if (validPosition && !IsPinTooCloseToExistingPin(pinPosition))
+        {
+            GameObject pin = Instantiate(pinPrefab, pinPosition, Quaternion.identity);
+            pin.tag = "Pin";
+
+            TMP_Text distanceText = pin.GetComponentInChildren<TMP_Text>();
+
+            if (pinPrefab == pinPointIconPrefab) UnhighlightButton(generalPinBackplate);
+            if (pinPrefab == hazardPinPrefab) UnhighlightButton(hazardPinBackplate);
+            if (pinPrefab == samplePinPrefab) UnhighlightButton(samplePinBackplate);
+
+            int evaNumber = evaNumberHandler != null ? evaNumberHandler.getEVANumber() : 0;
+            string evaKey = "eva" + evaNumber;
+
+            // Only proceed if we have a valid EVA number
+            if (evaNumber == 1 || evaNumber == 2)
             {
-                GameObject pin = Instantiate(pinPrefab, pinPosition, Quaternion.identity);
-                pin.tag = "Pin";
+                float x = imuDataHandler.GetPosx(evaKey) + pinPosition.x;
+                float y = imuDataHandler.GetPosy(evaKey) + pinPosition.y;
 
-                TMP_Text distanceText = pin.GetComponentInChildren<TMP_Text>();
-
-                if (pinPrefab == pinPointIconPrefab) UnhighlightButton(generalPinBackplate);
-                if (pinPrefab == hazardPinPrefab) UnhighlightButton(hazardPinBackplate);
-                if (pinPrefab == samplePinPrefab) UnhighlightButton(samplePinBackplate);
-
-
-
-     
-
-                int evaNumber = evaNumberHandler != null ? evaNumberHandler.getEVANumber() : 0;
-                string evaKey = "eva" + evaNumber;
-
-                // Only proceed if we have a valid EVA number
-                if (evaNumber == 1 || evaNumber == 2)
-                {
-                    float x = imuDataHandler.GetPosx(evaKey) + hitPoint.x;          // or just imu.getX()
-                    float y = imuDataHandler.GetPosy(evaKey) + hitPoint.y;          // same idea for Y
-
-                    PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", tags, 0, clip));
-                    distanceText.text = $"Name: {labelText}\nType: {tags}X: {x}\nY: {y} ";
-
-
-
-                }
+                PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", tags, 0, clip));
+                distanceText.text = $"Name: {labelText}\nType: {tags}X: {x}\nY: {y} ";
             }
         }
     }
