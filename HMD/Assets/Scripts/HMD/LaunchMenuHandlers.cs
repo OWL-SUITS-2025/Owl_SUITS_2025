@@ -80,7 +80,11 @@ public class LaunchMenuHandlers : MonoBehaviour
         //host = "147.185.221.27";
 
         // Using local computer:
-        host = "127.0.0.1";
+        //host = "127.0.0.1";
+
+        // Using fifth wifi
+        host = "192.168.0.128";
+
         // This is for TSS, make sure ur in team in web panel 
         // off by one, this will be team 7 on the panel
         team = 6;

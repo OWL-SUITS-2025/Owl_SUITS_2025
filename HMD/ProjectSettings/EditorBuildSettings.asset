@@ -5,7 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/HMD.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 0
@@ -29,6 +29,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/HMD Network test.unity
     guid: 02002082e416f6e44acf2c8d5aaacbac
+  - enabled: 1
+    path: Assets/Scenes/HMD_cam.unity
+    guid: 1d1ddc452fa31584f89a7fc4be27f5d1
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 1b2a91dfd863dd9488d0aaae761812a5, type: 2}
