@@ -29,8 +29,6 @@ MonoBehaviour:
   - m_enabled: 0
     m_path: Assets/Scenes/Modes/ING_NEW_UI.unity
   - m_enabled: 0
-    m_path: Assets/Scenes/HMD_copy_GEO.unity
-  - m_enabled: 0
     m_path: Assets/Scenes/Modes/GEO.unity
   - m_enabled: 0
     m_path: Assets/Scenes/NAV.unity
