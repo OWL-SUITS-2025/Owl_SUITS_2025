@@ -34,6 +34,8 @@ MonoBehaviour:
     m_path: Assets/Scenes/NAV.unity
   - m_enabled: 0
     m_path: Assets/Scenes/HMD Network test.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/HMD_cam.unity
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
     m_Settings:
