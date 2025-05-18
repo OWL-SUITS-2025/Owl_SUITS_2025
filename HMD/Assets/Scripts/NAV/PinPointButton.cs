@@ -7,6 +7,15 @@ using TMPro;
 using Microsoft.MixedReality.Toolkit.UI;
 using MixedReality.Toolkit;
 using MixedReality.Toolkit.UX;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using TMPro;
+using System;
+using Microsoft.MixedReality.Toolkit.UI;
+using MixedReality.Toolkit;
+using MixedReality.Toolkit.UX;
+using MixedReality.Toolkit.Subsystems;
 
 
 public class PinPointButton : MonoBehaviour
@@ -37,6 +46,7 @@ public class PinPointButton : MonoBehaviour
     public UnityEvent onSamplePinClick = new UnityEvent();
 
     public IMUDataHandler imuDataHandler;
+    [SerializeField] private EVANumberHandler evaNumberHandler;
 
     private bool isGeneralPinButtonPressed = false;
     private bool isHazardPinButtonPressed = false;
@@ -44,8 +54,12 @@ public class PinPointButton : MonoBehaviour
     private const float VISIBILITY_DISTANCE = 50f;
     private string tags;
 
-    private KeywordRecognizer keywordRecognizer;
-    private readonly string[] keywords = new string[] { "place pin" };
+ 
+
+    public string keyword = "Place Pin";
+
+
+    private KeywordRecognitionSubsystem keywordRecognitionSubsystem = null;
 
     [SerializeField] TextMeshPro recordLabel; // “Record / Stop” text
     [SerializeField] TextMeshPro plate;  // icon
@@ -92,28 +106,34 @@ public class PinPointButton : MonoBehaviour
             hazardPinBackplate.OnClicked.AddListener(() => OnHazardPinButtonPressed());
 
 
-        keywordRecognizer = new KeywordRecognizer(keywords);
-        keywordRecognizer.OnPhraseRecognized += OnPhraseRecognized;
-        keywordRecognizer.Start();
+        keywordRecognitionSubsystem = XRSubsystemHelpers.GetFirstRunningSubsystem<KeywordRecognitionSubsystem>();
+
+        if (keywordRecognitionSubsystem != null)
+        {
+            keywordRecognitionSubsystem.CreateOrGetEventForKeyword(keyword)
+                                     .AddListener(OnPhraseRecognized);
+            Debug.Log($"PinPointSpeechCommands: Listener added for keyword '{keyword}' on {gameObject.name}");
+        }
+        else
+        {
+            Debug.LogWarning("PinPointSpeechCommands: KeywordRecognitionSubsystem not found. Speech commands will not work.");
+        }
 
     }
 
     private void OnDestroy()
     {
-        if (keywordRecognizer != null)
+        if (keywordRecognitionSubsystem != null && !string.IsNullOrEmpty(keyword))
         {
-            keywordRecognizer.OnPhraseRecognized -= OnPhraseRecognized;
-            keywordRecognizer.Stop();
-            keywordRecognizer.Dispose();
+            Debug.Log($"PinPointSpeechCommands for '{keyword}' on {gameObject.name} is being disabled. Listener cleanup will rely on the subsystem or object destruction.");
         }
+        keywordRecognitionSubsystem = null;
     }
 
-    private void OnPhraseRecognized(PhraseRecognizedEventArgs args)
+    private void OnPhraseRecognized()
     {
-        if (args.text.ToLower() == "place pin")
-        {
-            OnPlacePinCommand();
-        }
+        Debug.Log($"PinPointSpeechCommands: Keyword '{keyword}' recognized on {gameObject.name}! Calling PinPointButton.");
+        OnPlacePinCommand();
     }
 
     public void OnPlacePinCommand()
@@ -121,7 +141,7 @@ public class PinPointButton : MonoBehaviour
         if (isGeneralPinButtonPressed)
         {
             
-            PlacePin(pinPointIconPrefab);
+            
             generalPinCount++;
             if (namePin != null)
             {
@@ -132,6 +152,7 @@ public class PinPointButton : MonoBehaviour
                 labelText = $"General {generalPinCount}: ";
             }
             tags = "General";
+            PlacePin(pinPointIconPrefab);
             isGeneralPinButtonPressed = false;
         }
         else if (isHazardPinButtonPressed)
@@ -165,9 +186,7 @@ public class PinPointButton : MonoBehaviour
             PlacePin(samplePinPrefab);
             isSamplePinButtonPressed = false;
         }
-        float posx = imuDataHandler.GetPosx("eva1");
-        float posy = imuDataHandler.GetPosy("eva1");
-        PinRegistry.AddPin(new PinData(posx, posy, labelText, tags, clip));
+        
     }
 
     public void OnGeneralPinButtonPressed()
@@ -175,7 +194,7 @@ public class PinPointButton : MonoBehaviour
         isGeneralPinButtonPressed = true;
         isHazardPinButtonPressed = false;
         isSamplePinButtonPressed = false;
-        PinRegistry.AddPin(new PinData(-5879, -10000, labelText, "general", null));
+        PinRegistry.AddPin(new PinData(-5879, -10000, labelText, new string[0], "", "general", 0, clip));
         HighlightButton(generalPinBackplate);
         UnhighlightButton(hazardPinBackplate);
         UnhighlightButton(samplePinBackplate);
@@ -252,29 +271,30 @@ public class PinPointButton : MonoBehaviour
                 if (pinPrefab == hazardPinPrefab) UnhighlightButton(hazardPinBackplate);
                 if (pinPrefab == samplePinPrefab) UnhighlightButton(samplePinBackplate);
 
-                StartCoroutine(UpdatePinState(pin.transform, distanceText, labelText));
+
+
+     
+
+                int evaNumber = evaNumberHandler != null ? evaNumberHandler.getEVANumber() : 0;
+                string evaKey = "eva" + evaNumber;
+
+                // Only proceed if we have a valid EVA number
+                if (evaNumber == 1 || evaNumber == 2)
+                {
+                    float x = imuDataHandler.GetPosx(evaKey) + hitPoint.x;          // or just imu.getX()
+                    float y = imuDataHandler.GetPosy(evaKey) + hitPoint.y;          // same idea for Y
+
+                    PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", tags, 0, clip));
+                    distanceText.text = $"Name: {labelText}\nType: {tags}X: {x}\nY: {y} ";
+
+
+
+                }
             }
         }
     }
 
-    private IEnumerator UpdatePinState(Transform pinTransform, TMP_Text distanceText, string pinlabelText)
-    {
-        Renderer pinRenderer = pinTransform.GetComponentInChildren<Renderer>();
 
-        while (true)
-        {
-            float distance = Vector3.Distance(pinTransform.position, Camera.main.transform.position);
-
-            distanceText.text = string.IsNullOrEmpty(pinlabelText) ?
-                $"{distance:F2}m" :
-                $"{pinlabelText}  {distance:F2}m";
-
-            distanceText.transform.rotation = Quaternion.LookRotation(distanceText.transform.position - Camera.main.transform.position);
-            pinRenderer.enabled = (distance <= VISIBILITY_DISTANCE);
-
-            yield return null;
-        }
-    }
 
     private bool IsPinTooCloseToExistingPin(Vector3 pinPosition)
     {

@@ -6,6 +6,7 @@ public class DisplayUpdater : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private IMUDataHandler imuDataHandler;        // drag your IMUDataHandler
+    [SerializeField] private EVANumberHandler evaNumberHandler;
     [SerializeField] private TMP_Text xyField;    // drag the <TextMeshPro> that shows X / Y
     [SerializeField] private TMP_Text heading;
 
@@ -25,13 +26,27 @@ public class DisplayUpdater : MonoBehaviour
 
         while (true)
         {
-            float x = imuDataHandler.GetPosx("eva1");          // or just imu.getX()
-            float y = imuDataHandler.GetPosy("eva1");          // same idea for Y
-            float head = imuDataHandler.GetHeading("eva1");
 
-            // show with two digits after the decimal: 12.34
-            xyField.text = $"X: {x:F2} m\nY: {y:F2} m";
-            heading.text = $"{head:F2}";
+            int evaNumber = evaNumberHandler != null ? evaNumberHandler.getEVANumber() : 0;
+            string evaKey = "eva" + evaNumber;
+
+            // Only proceed if we have a valid EVA number
+            if (evaNumber == 1 || evaNumber == 2)
+            {
+                float x = imuDataHandler.GetPosx(evaKey);          // or just imu.getX()
+                float y = imuDataHandler.GetPosy(evaKey);          // same idea for Y
+                float head = imuDataHandler.GetHeading(evaKey);
+
+                // show with two digits after the decimal: 12.34
+                xyField.text = $"X: {x:F2} m\nY: {y:F2} m";
+                heading.text = $"{head:F2}";
+
+            }
+            else
+            {
+                xyField.text = "X: NOT FOUND \nY: NOT FOUND";
+                heading.text = "NOT FOUND";
+            }
 
             yield return wait;
         }
