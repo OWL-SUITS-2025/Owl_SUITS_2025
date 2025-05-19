@@ -4,11 +4,18 @@ using Unity.VisualScripting;
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using System;
+using System.Collections.Generic;
+using UnityEditor.EditorTools;
+using System.Diagnostics;
 
 public class IngressTaskController : MonoBehaviour
 {
     [Header("UIA Panel Reference")]
     public UIAPanelImage uiaPanelController;
+
+    [Header("Progress Bubble Controller Reference")]
+    public ProgressBubbleController progressBubbleController;
 
     [Header("TSS Data Handlers")]
     // Access TSS Data through other scripts
@@ -16,47 +23,87 @@ public class IngressTaskController : MonoBehaviour
     public DataRanges dataRanges;
     public UIADataHandler uiaDataHandler;
     public DCUDataHandler dcuDataHandler;
+    public EVANumberHandler evaNumberHandler;
 
-    [Header("Progress Bar Game Objects")]
-    // Progress Bar Game Objects
-    public Transform ev1Background;
-    public Transform ev1Foreground;
-    public Transform ev2Background;
-    public Transform ev2Foreground;
-    public TextMeshPro ev1ProgressTextMeshPro;
-    public TextMeshPro ev2ProgressTextMeshPro;
+
+
+    [Header("Procedure JSON FIle")]
+    [Tooltip("Name of the JSON (without .json) in Assets/Resources")]
+    public string jsonResourceName = "IngressProcedure";
+
+
+    [Header("UI References")]
+    [Tooltip("Single TMP object for “• LOCATION; description”")]
+    public TextMeshProUGUI stepsText;
+    // [Header("Progress Bar Game Objects")]
+    // // Progress Bar Game Objects
+    // public Transform ev1Background;
+    // public Transform ev1Foreground;
+    // public Transform ev2Background;
+    // public Transform ev2Foreground;
+    // public TextMeshPro ev1ProgressTextMeshPro;
+    // public TextMeshPro ev2ProgressTextMeshPro;
 
     // Progress Text Game Object
     public TextMeshPro taskStatusTextMeshPro;
-
-    // Task Detail Game Objects
-    public TextMeshPro stepTitleTextMeshPro;
+    // both the same??????????????????????
     public TextMeshPro taskTextMeshPro;
 
     // Switch Location Game Object (This tells user where is the switch, either UIA or DCU)
+    [Tooltip("Switch Location TextMeshPro Object")]
     public TextMeshPro SwitchLocationText;
-
-    [Header("Colors for text and overlays")]
+    // add tooltip
+    [Header("Colors for overlays")]
     public Color completedColor = Color.green;
     public Color incompleteColor = Color.red;
     public Color inProgressColor = Color.yellow;
 
-    private string[] tasks = new string[]
+
+    // Get EVA number
+    int evaNumber;
+
+    // flat list of all subtasks (Connect→3, O2→3, Water→4, End→2 = 12 items)
+    private List<Subtask> allSubtasks = new List<Subtask>(); // this will be loaded later with JSON loader
+    private int lastSubtaskIndex = -1;
+
+    #region JSON Data/Task Classes
+    [Serializable]
+    private class Subtask
     {
-        "Step 1: Connect UIA to DCU\nEV1 and EV2: connect UIA and DCU umbilical.",         // Task index 0
-        "Step 2: Power UIA ON\nUIA: EV-1, EV-2 EMU PWR � ON.",         // Task index 1
-        "Step 3: Configure DCU\nBOTH DCU: BATT � UMB.",         // Task index 2
-        "Step 4: Vent O2 Tanks\nUIA: OXYGEN O2 VENT � OPEN.",         // Task index 3
-        "Step 4: Vent O2 Tanks\nWait until both Primary and Secondary OXY tanks are < 10psi.",         // Task index 4
-        "Step 4: Vent O2 Tanks\nUIA: OXYGEN O2 VENT � CLOSE.",         // Task index 5
-        "Step 5: Empty Water Tanks\nBOTH DCU: PUMP � OPEN.",         // Task index 6
-        "Step 5: Empty Water Tanks\nUIA: EV-1, EV-2 WASTE WATER � OPEN.",         // Task index 7
-        "Step 5: Empty Water Tanks\nWait until EV1 and EV2 Coolant tanks < 5%.",         // Task index 8
-        "Step 5: Empty Water Tanks\nUIA: EV-1, EV-2 WASTE WATER � CLOSE.",         // Task index 9
-        "Step 6: Disconnect UIA from DCU\nUIA: EV-1, EV-2 EMU PWR � OFF.",         // Task index 10
-        "Step 6: Disconnect UIA from DCU\nDCU: EV1 and EV2 disconnect umbilical.",         // Task index 11
-        "End: Congratulations!\n You have completed the ingress task.",         // Task index 12
-    };
+        public string location;
+        public string description;
+    }
+    [Serializable]
+    private class Task
+    {
+        public string stepTitle;    // we ignore this; headings baked into sprites
+        public Subtask[] subtasks;
+    }
+    [Serializable]
+    private class TaskList
+    {
+        public Task[] steps;
+    }
+    #endregion
+
+
+    // TODO: remove this commented code. This is replaced with the JSON loading now.
+    // private string[] tasks = new string[]
+    // {
+    //     "Step 1: Connect UIA to DCU\nEV1 and EV2: connect UIA and DCU umbilical.",         // Task index 0
+    //     "Step 2: Power UIA ON\nUIA: EV-1, EV-2 EMU PWR � ON.",         // Task index 1
+    //     "Step 3: Configure DCU\nBOTH DCU: BATT � UMB.",         // Task index 2
+    //     "Step 4: Vent O2 Tanks\nUIA: OXYGEN O2 VENT � OPEN.",         // Task index 3
+    //     "Step 4: Vent O2 Tanks\nWait until both Primary and Secondary OXY tanks are < 10psi.",         // Task index 4
+    //     "Step 4: Vent O2 Tanks\nUIA: OXYGEN O2 VENT � CLOSE.",         // Task index 5
+    //     "Step 5: Empty Water Tanks\nBOTH DCU: PUMP � OPEN.",         // Task index 6
+    //     "Step 5: Empty Water Tanks\nUIA: EV-1, EV-2 WASTE WATER � OPEN.",         // Task index 7
+    //     "Step 5: Empty Water Tanks\nWait until EV1 and EV2 Coolant tanks < 5%.",         // Task index 8
+    //     "Step 5: Empty Water Tanks\nUIA: EV-1, EV-2 WASTE WATER � CLOSE.",         // Task index 9
+    //     "Step 6: Disconnect UIA from DCU\nUIA: EV-1, EV-2 EMU PWR � OFF.",         // Task index 10
+    //     "Step 6: Disconnect UIA from DCU\nDCU: EV1 and EV2 disconnect umbilical.",         // Task index 11
+    //     "End: Congratulations!\n You have completed the ingress task.",         // Task index 12
+    // };
 
     private int currentTaskIndex = 0;
 
@@ -69,6 +116,7 @@ public class IngressTaskController : MonoBehaviour
     private void Start()
     {
         UpdateTaskText();
+
         uiaPanelController.PositionPanelToLeftOfUser();
         // Should hopefully fix array OOB error that happens when
         // Switching from co
@@ -79,20 +127,73 @@ public class IngressTaskController : MonoBehaviour
 
     private void Update()
     {
-        UpdateProgressBar();
+        UpdateProgress();
     }
+    private void Awake()
+    {
+        // Initialize EVA number
+        evaNumber = evaNumberHandler.getEVANumber();
 
-    private void UpdateProgressBar()
+        LoadProcedureFromJSON();
+        
+    }
+    private void LoadProcedureFromJSON()
+    {
+        var ta = Resources.Load<TextAsset>(jsonResourceName);
+        if (ta == null)
+        {
+            Debug.LogError($"[Ingress] JSON not found in Resources: '{jsonResourceName}.json'");
+            return;
+        }
+
+        try
+        {
+            var wrapper = JsonUtility.FromJson<TaskList>(ta.text);
+            if (wrapper?.steps == null)
+            {
+                Debug.LogError("[Ingress] JSON parsing failed: 'steps' is null");
+                return;
+            }
+
+            // flatten subtasks in order
+            allSubtasks.Clear();
+            foreach (var step in wrapper.steps)
+            {
+                if (step.subtasks != null)
+                    allSubtasks.AddRange(step.subtasks);
+            }
+
+            Debug.Log($"[Ingress] Loaded {allSubtasks.Count} subtasks from JSON.");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[Ingress] Error parsing JSON: {e}");
+        }
+    }
+    // private void InitializeBubbles()
+    // {
+    //     // disable all
+    //     for (int i = 0; i < progressBubbles.Length; i++)
+    //     {
+    //         progressBubbles[i].gameObject.SetActive(false);
+    //     }
+    //     // show start bubble (index 0)
+    //     if (progressBubbles.Length > 0)
+    //         progressBubbles[0].gameObject.SetActive(true);
+    // }
+
+    private void UpdateProgress()
     {
         int currentTaskIndex = TaskManager.Instance.GetCurrentTaskIndex();
         UpdateSwitchLocationText(currentTaskIndex);
-        float progress = 0f;
-
+        // float progress = 0f;
+        // we will use currentTaskIndex to determine which task we are on
         switch (currentTaskIndex)
         {
-            case 0: // Step 1: Connect UIA to DCU
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+            case 0: // Step 1: Connect UIA to DCU Umbilical
+                    // ingress 1.1 always
+                // Reset task text
+                ResetTaskText();
 
                 // Disable all overlays if we go backwards to 1st step (UIA Panel not needed here)
                 uiaPanelController.DeactivateAllOverlays();
@@ -103,84 +204,81 @@ public class IngressTaskController : MonoBehaviour
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"<color=green>EV-1 and EV-2: Connected UIA and DCU umbilical.</color>";
+                taskStatusTextMeshPro.text = $"<color=green>UIA to DCU connected via umbilical successfully!</color>";
+
+                // Update Bubble
+                progressBubbleController.DeactivateAllBubbles();
+                progressBubbleController.SetBubbleState(currentTaskIndex+1, true);
                 // TODO implement UIA and DCU umb check from EgressTaskController.cs
-                progress = 1f;
+                // progress = 1f;
                 break;
 
             case 1: // Step 2: Power UIA ON
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+                    // start at ingress 1.1, end at 1.2
+                // Reset task text
+                ResetTaskText();
+                
+                
+                // Deactivate all overlays, then activate power eva (index 0 or 1 depending on ev #) 
+                uiaPanelController.DeactivateAllOverlays();               
+                uiaPanelController.SetOverlayState(evaNumber-1, true); // Power respective EVA
 
-                // Deactivate all overlays, then activate power ev1 (index 0) and power ev2 (index 1)
-                uiaPanelController.DeactivateAllOverlays();
-                uiaPanelController.SetOverlayState(0, true); // Power EV1
-                uiaPanelController.SetOverlayState(1, true); // Power EV2
-                // Check if EV-1 and EV-2 EMU PWR switches are ON
-                bool isEVA1PowerOn = uiaDataHandler.GetPower("eva1");
-                bool isEVA2PowerOn = uiaDataHandler.GetPower("eva2");
-
-                // Check and change overlay colors if the user has completed the task or not
-                if (isEVA1PowerOn)
+                // Check if EVA PWR switch is ON
+                bool isEVAPowerOn = uiaDataHandler.GetPower("eva"+evaNumber);
+                // Check and change overlay colors, and update progress bubble, if the user has completed the task or not
+                if (isEVAPowerOn)
                 {
-                    uiaPanelController.ChangeToCustomColor(0, completedColor);
+                    uiaPanelController.ChangeToCustomColor(evaNumber - 1, completedColor);
+                    // Progress bubbles to completed this step
+                    progressBubbleController.DeactivateAllBubbles();
+                    progressBubbleController.SetBubbleState(currentTaskIndex+1, true);
                 }
                 else
                 {
-                    uiaPanelController.ChangeToCustomColor(0, incompleteColor);
-                }
-
-                if (isEVA2PowerOn)
-                {
-                    uiaPanelController.ChangeToCustomColor(1, completedColor);
-                }
-                else
-                {
-                    uiaPanelController.ChangeToCustomColor(1, incompleteColor);
-                }
-
-
-                if (isEVA1PowerOn && isEVA2PowerOn)
-                {
-                    progress = 1f;
-
+                    uiaPanelController.ChangeToCustomColor(evaNumber - 1, incompleteColor);
                 }
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"<color={GetColorName(isEVA1PowerOn)}>EV-1 EMU PWR: {(isEVA1PowerOn ? "ON" : "OFF")}</color>\n<color={GetColorName(isEVA2PowerOn)}>EV-2 EMU PWR: {(isEVA2PowerOn ? "ON" : "OFF")}</color>";
+                taskStatusTextMeshPro.text = $"<color={GetColorName(isEVAPowerOn)}>{allSubtasks[currentTaskIndex].description}</color>";
                 break;
 
             case 2: // Step 3: Configure DCU
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+                    // ingress 1.2 start, 1.3 end
+                // Reset task text
+                ResetTaskText();
 
                 // Deactivate all overlays, UIA panel not needed here
                 uiaPanelController.DeactivateAllOverlays();
 
 
                 // Check if BATT switch is UMB on both DCUs
-                bool isDCU1BattUMB = dcuDataHandler.GetBatt("eva1");
-                bool isDCU2BattUMB = dcuDataHandler.GetBatt("eva2");
+                bool isDCUBattUMB = dcuDataHandler.GetBatt("eva"+evaNumber);
 
-                if (isDCU1BattUMB && isDCU2BattUMB)
+                if (isDCUBattUMB)
                 {
-                    progress = 1f;
+                    // Progress bubbles to completed this step
+                    progressBubbleController.DeactivateAllBubbles();
+                    progressBubbleController.SetBubbleState(currentTaskIndex+1, true);
                 }
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"<color={GetColorName(isDCU1BattUMB)}>DCU1 BATT: {(isDCU1BattUMB ? "UMB" : "LOCAL")}</color>\n<color={GetColorName(isDCU2BattUMB)}>DCU2 BATT: {(isDCU2BattUMB ? "UMB" : "LOCAL")}</color>";
+                taskStatusTextMeshPro.text = $"<color={GetColorName(isDCUBattUMB)}>{allSubtasks[currentTaskIndex].description}</color>";
                 break;
 
             case 3: // Step 4: Vent O2 Tanks - UIA: OXYGEN O2 VENT � OPEN
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+                    // ingress 2.0 start, 2.1 end
+                // Reset task text
+                ResetTaskText();
 
                 // Deactivate all overlays, then activate O2 vent (index 4) 
                 uiaPanelController.DeactivateAllOverlays();
                 uiaPanelController.SetOverlayState(4, true); // O2 Vent
 
+                // Update progress
+                progressBubbleController.DeactivateAllBubbles();
+                progressBubbleController.SetBubbleState(currentTaskIndex+1, true);
                 // Check if OXYGEN O2 VENT switch is OPEN
                 bool isOxygenO2VentOpen = uiaDataHandler.GetOxy_Vent();
 
@@ -188,33 +286,33 @@ public class IngressTaskController : MonoBehaviour
                 if (isOxygenO2VentOpen)
                 {
                     uiaPanelController.ChangeToCustomColor(4, inProgressColor); // should stay yellow bc it will eventually hit green in next step
-                    progress = 1f;
+                    // Progress bubbles to completed this step
+                    progressBubbleController.DeactivateAllBubbles();
+                    progressBubbleController.SetBubbleState(currentTaskIndex+2, true);
                 }
 
                 // Update the status text
                 taskStatusTextMeshPro.gameObject.SetActive(true);
-                taskStatusTextMeshPro.text = $"<color={GetColorName(isOxygenO2VentOpen)}>OXYGEN O2 VENT: {(isOxygenO2VentOpen ? "OPEN" : "CLOSED")}</color>";
+                taskStatusTextMeshPro.text = $"<color={GetColorName(isOxygenO2VentOpen)}>{allSubtasks[currentTaskIndex].description}</color>";
                 break;
 
-            case 4: // Step 4: Vent O2 Tanks - Wait until both Primary and Secondary OXY tanks are < 10psi
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+            case 4: // Step 4: Vent O2 Tanks - Wait until both Primary and Secondary OXY tanks are < 10psi\
+                // ingress 2.1 start, 2.2 end
+                // Reset task text
+                ResetTaskText();
 
                 // Deactivate all overlays, then activate O2 vent (index 4) 
                 uiaPanelController.DeactivateAllOverlays();
                 uiaPanelController.SetOverlayState(4, true); // O2 Vent
 
                 // Activate the progress bar
-                ActivateProgressBar();
+                // ActivateProgressBar();
 
-                float eva1PrimaryPressure = telemetryDataHandler.GetOxyPriPressure("eva1");
-                float eva1SecondaryPressure = telemetryDataHandler.GetOxySecPressure("eva1");
-                float eva2PrimaryPressure = telemetryDataHandler.GetOxyPriPressure("eva2");
-                float eva2SecondaryPressure = telemetryDataHandler.GetOxySecPressure("eva2");
+                float evaPrimaryPressure = telemetryDataHandler.GetOxyPriPressure("eva"+evaNumber);
+                float evaSecondaryPressure = telemetryDataHandler.GetOxySecPressure("eva"+evaNumber);
 
                 // We want to make sure both are less than 10psi, so we use the maximum pressure of the two tanks
-                float eva1MaxPressure = Mathf.Max(eva1PrimaryPressure, eva1SecondaryPressure);
-                float eva2MaxPressure = Mathf.Max(eva2PrimaryPressure, eva2SecondaryPressure);
+                float evaMaxPressure = Mathf.Max(evaPrimaryPressure, evaSecondaryPressure);
 
                 // Debug primary and secondary pressure for both eva1 and 2, also max pressure
                 // Debug.Log($"EV1 Primary Pressure: {eva1PrimaryPressure:F0}psi, Secondary Pressure: {eva1SecondaryPressure:F0}psi, Max Pressure: {eva1MaxPressure:F0}psi");
@@ -223,84 +321,62 @@ public class IngressTaskController : MonoBehaviour
 
 
 
-                float progressEV1 = 0f;
-                float progressEV2 = 0f;
+                float tankProgress = 0f;
+                // float progressEV2 = 0f;
 
-                if (eva1MaxPressure < 10f && eva2MaxPressure < 10f)
+                if (evaMaxPressure < 10f)
                 {
-                    // If both EV1 and EV2 primary pressures are below 10, consider the task as completed
-                    progressEV1 = 1f;
-                    progressEV2 = 1f;
+                    // If  EVA primary pressure is  below 10, consider the task as completed
+                    tankProgress = 1f;
                 }
                 else
                 {
                     // Calculate progress based on the primary pressure values
                     double oxyPriPressureMax = dataRanges.oxy_pri_pressure.Max;
 
-                    progressEV1 = Mathf.Clamp01((float)((oxyPriPressureMax - eva1MaxPressure) / (oxyPriPressureMax - 10f)));
-                    progressEV2 = Mathf.Clamp01((float)((oxyPriPressureMax - eva2MaxPressure) / (oxyPriPressureMax - 10f)));
+                    tankProgress = Mathf.Clamp01((float)((oxyPriPressureMax - evaMaxPressure) / (oxyPriPressureMax - 10f)));
                     // Debug.Log($"EV1 Progress: {progressEV1:F2}, EV2 Progress: {progressEV2:F2}");
                 }
 
-                UpdateProgressBarSize(progressEV1, progressEV2);
+                // UpdateProgressBarSize(progressEV1, progressEV2);
 
-                ev1ProgressTextMeshPro.text = $"EV1: {eva1MaxPressure:F0}psi (Current) < 10psi (Goal)";
-                ev2ProgressTextMeshPro.text = $"EV2: {eva2MaxPressure:F0}psi (Current) < 10psi (Goal)";
+                // ev1ProgressTextMeshPro.text = $"EV1: {eva1MaxPressure:F0}psi (Current) < 10psi (Goal)";
+                // ev2ProgressTextMeshPro.text = $"EV2: {eva2MaxPressure:F0}psi (Current) < 10psi (Goal)";
 
                 // Update the color of the progress bars based on their respective progress
-                if (progressEV1 < 1f)
+                if (tankProgress < 1f)
                 {
-                    if (progressEV1 > 0.01f)
+                    if (tankProgress > 0.01f)
                     {
-                        ev1Foreground.GetComponent<Renderer>().material.color = inProgressColor;
                         uiaPanelController.ChangeToCustomColor(4, inProgressColor); // can possibly remove this
+                        // Update the status text
+                        taskStatusTextMeshPro.gameObject.SetActive(true);
+                        taskStatusTextMeshPro.text = $"<color=yellow>{allSubtasks[currentTaskIndex].description}</color>";
                     }
                     else
                     {
-                        ev1Foreground.GetComponent<Renderer>().material.color = incompleteColor;
                         uiaPanelController.ChangeToCustomColor(4, incompleteColor);
+                        // Update the status text
+                        taskStatusTextMeshPro.gameObject.SetActive(true);
+                        taskStatusTextMeshPro.text = $"<color=red>{allSubtasks[currentTaskIndex].description}</color>";
                     }
                 }
                 else
                 {
-                    ev1Foreground.GetComponent<Renderer>().material.color = completedColor;
                     uiaPanelController.ChangeToCustomColor(4, completedColor);
-                }
-
-                if (progressEV2 < 1f)
-                {
-                    if (progressEV2 > 0.01f)
-                    {
-                        ev2Foreground.GetComponent<Renderer>().material.color = inProgressColor;
-                        uiaPanelController.ChangeToCustomColor(4, inProgressColor); // can possibly remove this
-
-                    }
-                    else
-                    {
-                        ev2Foreground.GetComponent<Renderer>().material.color = incompleteColor;
-                        uiaPanelController.ChangeToCustomColor(4, incompleteColor);
-
-                    }
-                }
-                else
-                {
-                    ev2Foreground.GetComponent<Renderer>().material.color = completedColor;
-                    uiaPanelController.ChangeToCustomColor(4, completedColor);
-
-                }
-
-                if (eva1MaxPressure <= 10f && eva2MaxPressure <= 10f)
-                {
-                    // Debug
-                    // Debug.Log("Both EV1 and EV2 O2 tanks are below 10psi. Completed?");
-                    // Debug.Log($"EV1 Max Pressure: {eva1MaxPressure:F0}psi, EV2 Max Pressure: {eva2MaxPressure:F0}psi");
-                    // GoForward();
+                    // Update the status text
+                    taskStatusTextMeshPro.gameObject.SetActive(true);
+                    taskStatusTextMeshPro.text = $"<color=green>{allSubtasks[currentTaskIndex].description}</color>";
+                    // Progress bubbles to completed this step
+                    progressBubbleController.DeactivateAllBubbles();
+                    progressBubbleController.SetBubbleState(currentTaskIndex+2, true);
                 }
                 break;
 
             case 5: // Step 4: Vent O2 Tanks - UIA: OXYGEN O2 VENT � CLOSE
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+                // ingress 2.2 start, 2.3 end
+                // Reset task text
+                ResetTaskText();
 
                 // Deactivate all overlays, then activate O2 vent (index 4) 
                 uiaPanelController.DeactivateAllOverlays();
@@ -312,7 +388,9 @@ public class IngressTaskController : MonoBehaviour
                 if (isOxygenO2VentClose)
                 {
                     uiaPanelController.ChangeToCustomColor(4, completedColor);
-                    progress = 1f;
+                    // progress bubbles to completed this step
+                    progressBubbleController.DeactivateAllBubbles();
+                    progressBubbleController.SetBubbleState(currentTaskIndex+2, true);
                 }
                 else
                 {
@@ -326,12 +404,16 @@ public class IngressTaskController : MonoBehaviour
                 break;
 
             case 6: // Step 5: Empty Water Tanks - BOTH DCU: PUMP � OPEN
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+                // ingress 3.0 start (+2 then +3?), 3.1 end
+                // Reset task text
+                ResetTaskText();
 
                 // Deactivate all overlays, this task doesn't involve UIA overlay 
                 uiaPanelController.DeactivateAllOverlays();
 
+                // progress bubbles to completed this step
+                progressBubbleController.DeactivateAllBubbles();
+                progressBubbleController.SetBubbleState(currentTaskIndex+1, true);
                 // Check if PUMP switch is OPEN on both DCUs
                 bool isDCU1PumpOpen = dcuDataHandler.GetPump("eva1");
                 bool isDCU2PumpOpen = dcuDataHandler.GetPump("eva2");
@@ -347,8 +429,8 @@ public class IngressTaskController : MonoBehaviour
                 break;
 
             case 7: // Step 5: Empty Water Tanks - UIA: EV-1, EV-2 WASTE WATER � OPEN
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+                // Reset task text
+                ResetTaskText();
 
                 // Deactivate all overlays, then activate water waste vents (index 5 and 6) 
                 uiaPanelController.DeactivateAllOverlays();
@@ -380,8 +462,8 @@ public class IngressTaskController : MonoBehaviour
                 break;
 
             case 8: // Step 5: Empty Water Tanks - Wait until EV1 and EV2 Coolant tanks < 5%
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+                // Reset task text
+                ResetTaskText();
 
                 // Deactivate all overlays, then activate water waste vents (index 5 and 6) 
                 uiaPanelController.DeactivateAllOverlays();
@@ -453,8 +535,8 @@ public class IngressTaskController : MonoBehaviour
                 break;
 
             case 9: // Step 5: Empty Water Tanks - UIA: EV-1, EV-2 WASTE WATER � CLOSE
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+                // Reset task text
+                ResetTaskText();
 
                 // Deactivate all overlays, then activate water waste vents (index 5 and 6) 
                 uiaPanelController.DeactivateAllOverlays();
@@ -496,8 +578,8 @@ public class IngressTaskController : MonoBehaviour
                 break;
 
             case 10: // Step 6: Disconnect UIA from DCU - UIA: EV-1, EV-2 EMU PWR � OFF
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+                // Reset task text
+                ResetTaskText();
 
                 // Deactivate all overlays, then activate power ev1 (index 0) and power ev2 (index 1)
                 uiaPanelController.DeactivateAllOverlays();
@@ -538,8 +620,8 @@ public class IngressTaskController : MonoBehaviour
                 break;
 
             case 11: // Step 6: Disconnect UIA from DCU - DCU: EV1 and EV2 disconnect umbilical
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+                // Reset task text
+                ResetTaskText();
 
 
                 // Deactivate all overlays, this task doesn't require UIA panel
@@ -555,8 +637,8 @@ public class IngressTaskController : MonoBehaviour
                 progress = 1f;
                 break;
             case 12:
-                // Reset progress bar and text
-                ResetProgressBarAndText();
+                // Reset task text
+                ResetTaskText();
 
                 // Deactivate all overlays for other cases
                 uiaPanelController.DeactivateAllOverlays();
@@ -569,8 +651,8 @@ public class IngressTaskController : MonoBehaviour
                 break;
 
             default:
-                // Reset progress bar and text for other cases
-                ResetProgressBarAndText();
+                // Reset task text for other cases
+                ResetTaskText();
                 // Deactivate all overlays for other cases
                 uiaPanelController.DeactivateAllOverlays();
 
@@ -590,63 +672,63 @@ public class IngressTaskController : MonoBehaviour
         }
     }
 
-    private void UpdateProgressBarSize(float progressEV1, float progressEV2)
+    // private void UpdateProgressBarSize(float progressEV1, float progressEV2)
+    // {
+    //     // In Unity, if you want to transform a 3D object in one direction, you have to
+    //     // translate the object as you scale it to ensure there exists a pivot point
+
+    //     // EV1 Progress Bar
+    //     Vector3 ev1BackgroundScale = ev1Background.localScale;
+    //     Vector3 ev1ForegroundScale = ev1Foreground.localScale;
+
+    //     ev1ForegroundScale.x = ev1BackgroundScale.x * progressEV1;
+    //     ev1Foreground.localScale = ev1ForegroundScale;
+
+    //     Vector3 ev1ForegroundPosition = ev1Foreground.localPosition;
+    //     Vector3 ev1BackgroundPosition = ev1Background.localPosition;
+    //     float ev1LeftPivot = ev1BackgroundPosition.x - ev1BackgroundScale.x * 0.5f;
+    //     ev1ForegroundPosition.x = ev1LeftPivot + ev1ForegroundScale.x * 0.5f;
+    //     ev1Foreground.localPosition = ev1ForegroundPosition;
+
+    //     // EV2 Progress Bar
+    //     Vector3 ev2BackgroundScale = ev2Background.localScale;
+    //     Vector3 ev2ForegroundScale = ev2Foreground.localScale;
+
+    //     ev2ForegroundScale.x = ev2BackgroundScale.x * progressEV2;
+    //     ev2Foreground.localScale = ev2ForegroundScale;
+
+    //     Vector3 ev2ForegroundPosition = ev2Foreground.localPosition;
+    //     Vector3 ev2BackgroundPosition = ev2Background.localPosition;
+    //     float ev2LeftPivot = ev2BackgroundPosition.x - ev2BackgroundScale.x * 0.5f;
+    //     ev2ForegroundPosition.x = ev2LeftPivot + ev2ForegroundScale.x * 0.5f;
+    //     ev2Foreground.localPosition = ev2ForegroundPosition;
+    // }
+
+    // private void ActivateProgressBar()
+    // {
+    //     ev1Background.gameObject.SetActive(true);
+    //     ev1Foreground.gameObject.SetActive(true);
+    //     ev1ProgressTextMeshPro.gameObject.SetActive(true);
+
+    //     ev2Background.gameObject.SetActive(true);
+    //     ev2Foreground.gameObject.SetActive(true);
+    //     ev2ProgressTextMeshPro.gameObject.SetActive(true);
+    // }
+
+    private void ResetTaskText()
     {
-        // In Unity, if you want to transform a 3D object in one direction, you have to
-        // translate the object as you scale it to ensure there exists a pivot point
+        // // // Deactivate the progress bars
+        // // ev1Background.gameObject.SetActive(false);
+        // // ev1Foreground.gameObject.SetActive(false);
+        // // ev1ProgressTextMeshPro.gameObject.SetActive(false);
 
-        // EV1 Progress Bar
-        Vector3 ev1BackgroundScale = ev1Background.localScale;
-        Vector3 ev1ForegroundScale = ev1Foreground.localScale;
+        // // ev2Background.gameObject.SetActive(false);
+        // // ev2Foreground.gameObject.SetActive(false);
+        // // ev2ProgressTextMeshPro.gameObject.SetActive(false);
 
-        ev1ForegroundScale.x = ev1BackgroundScale.x * progressEV1;
-        ev1Foreground.localScale = ev1ForegroundScale;
-
-        Vector3 ev1ForegroundPosition = ev1Foreground.localPosition;
-        Vector3 ev1BackgroundPosition = ev1Background.localPosition;
-        float ev1LeftPivot = ev1BackgroundPosition.x - ev1BackgroundScale.x * 0.5f;
-        ev1ForegroundPosition.x = ev1LeftPivot + ev1ForegroundScale.x * 0.5f;
-        ev1Foreground.localPosition = ev1ForegroundPosition;
-
-        // EV2 Progress Bar
-        Vector3 ev2BackgroundScale = ev2Background.localScale;
-        Vector3 ev2ForegroundScale = ev2Foreground.localScale;
-
-        ev2ForegroundScale.x = ev2BackgroundScale.x * progressEV2;
-        ev2Foreground.localScale = ev2ForegroundScale;
-
-        Vector3 ev2ForegroundPosition = ev2Foreground.localPosition;
-        Vector3 ev2BackgroundPosition = ev2Background.localPosition;
-        float ev2LeftPivot = ev2BackgroundPosition.x - ev2BackgroundScale.x * 0.5f;
-        ev2ForegroundPosition.x = ev2LeftPivot + ev2ForegroundScale.x * 0.5f;
-        ev2Foreground.localPosition = ev2ForegroundPosition;
-    }
-
-    private void ActivateProgressBar()
-    {
-        ev1Background.gameObject.SetActive(true);
-        ev1Foreground.gameObject.SetActive(true);
-        ev1ProgressTextMeshPro.gameObject.SetActive(true);
-
-        ev2Background.gameObject.SetActive(true);
-        ev2Foreground.gameObject.SetActive(true);
-        ev2ProgressTextMeshPro.gameObject.SetActive(true);
-    }
-
-    private void ResetProgressBarAndText()
-    {
-        // Deactivate the progress bars
-        ev1Background.gameObject.SetActive(false);
-        ev1Foreground.gameObject.SetActive(false);
-        ev1ProgressTextMeshPro.gameObject.SetActive(false);
-
-        ev2Background.gameObject.SetActive(false);
-        ev2Foreground.gameObject.SetActive(false);
-        ev2ProgressTextMeshPro.gameObject.SetActive(false);
-
-        // Reset the progress text
-        ev1ProgressTextMeshPro.text = string.Empty;
-        ev2ProgressTextMeshPro.text = string.Empty;
+        // // Reset the progress text
+        // ev1ProgressTextMeshPro.text = string.Empty;
+        // ev2ProgressTextMeshPro.text = string.Empty;
 
         // Deactivate the status text
         taskStatusTextMeshPro.gameObject.SetActive(false);
@@ -658,7 +740,7 @@ public class IngressTaskController : MonoBehaviour
     public void GoForward()
     {
         int currentTaskIndex = TaskManager.Instance.GetCurrentTaskIndex();
-        if (currentTaskIndex < tasks.Length - 1)
+        if (currentTaskIndex < allSubtasks.Count - 1)
         {
             TaskManager.Instance.SetCurrentTaskIndex(currentTaskIndex + 1);
             UpdateTaskText();
@@ -678,33 +760,39 @@ public class IngressTaskController : MonoBehaviour
     private void UpdateTaskText()
     {
         int currentTaskIndex = TaskManager.Instance.GetCurrentTaskIndex();
-        string currentTask = tasks[currentTaskIndex];
-        string[] lines = currentTask.Split('\n');
-        stepTitleTextMeshPro.text = lines[0];
-        taskTextMeshPro.text = string.Join("\n", lines, 1, lines.Length - 1);
+        string currentTask = allSubtasks[currentTaskIndex].description.Trim();
+        // Reset the task text
+        ResetTaskText();
+        taskTextMeshPro.text = currentTask;
+
+        // // Deactivate the progress bars
+        // string[] lines = currentTask.Split('\n');
+        // stepTitleTextMeshPro.text = lines[0];
+        // taskTextMeshPro.text = string.Join("\n", lines, 1, lines.Length - 1);
     }
 
     private void UpdateSwitchLocationText(int currentTaskIndex)
     {
-        if (currentTaskIndex >= 0 && currentTaskIndex < tasks.Length)
+        if (currentTaskIndex >= 0 && currentTaskIndex < allSubtasks.Count)
         {
-            string currentTask = tasks[currentTaskIndex];
-            if (currentTask.Contains("UIA") && currentTask.Contains("DCU"))
+            string location = allSubtasks[currentTaskIndex].location.Trim().ToUpper();
+            if (location == "DCU")
             {
-                SwitchLocationText.text = "DCU\nUIA";
+                location = "• DCU";
             }
-            else if (currentTask.Contains("UIA"))
+            else if (location == "UIA")
             {
-                SwitchLocationText.text = "UIA";
+                location = "• UIA";
             }
-            else if (currentTask.Contains("DCU"))
+            else if (location == "UIA AND DCU")
             {
-                SwitchLocationText.text = "DCU";
+                location = "• UIA\n• DCU";
             }
             else
             {
-                SwitchLocationText.text = "";
+                location = "";
             }
+            SwitchLocationText.text = location;
         }
         else
         {

@@ -1,0 +1,36 @@
+{
+  "steps": [
+    {
+      "stepTitle": "Connect UIA to DCU and start Depress",
+      "subtasks": [
+        { "location": "UIA and DCU", "description": "EV1: Connect UIA to DCU via umbilical port" },
+        { "location": "UIA",         "description": "EV1: Switch \"EMU POWER\" to ON" },
+        { "location": "DCU",         "description": "EV1: Switch power from BATT to UMB" }
+      ]
+    },
+    {
+      "stepTitle": "Vent O2 Tanks",
+      "subtasks": [
+        { "location": "UIA", "description": "EV1: Open Oxygen (O2) Vent" },
+        { "location": "HMD", "description": "EV1: Wait until both Primary and Secondary OXY tanks are < 10psi" },
+        { "location": "UIA", "description": "EV1: Close Oxygen (O2) Vent" }
+      ]
+    },
+    {
+      "stepTitle": "Empty Water Tanks",
+      "subtasks": [
+        { "location": "DCU", "description": "EV1: Open PUMP" },
+        { "location": "UIA", "description": "EV1: Open WASTE WATER tank" },
+        { "location": "HMD", "description": "EV1: Wait until water Coolant tank is < 5%" },
+        { "location": "UIA", "description": "EV1: Close WASTE WATER tank" }
+      ]
+    },
+    {
+      "stepTitle": "Disconnect UIA from DCU",
+      "subtasks": [
+        { "location": "UIA", "description": "EV1: Switch \"EMU POWER\" to OFF" },
+        { "location": "DCU", "description": "EV1: Disconnect DCU from UIA via umbilical port" }
+      ]
+    }
+  ]
+}
