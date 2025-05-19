@@ -74,7 +74,7 @@ public class LaunchMenuHandlers : MonoBehaviour
         // Use this to HARDCODE the server address
 
         // Using NASA Rockyard IP:
-        // host = "168.4.146.212";
+        //host = "192.168.51.110";
 
         // Using Local Server:
         host = "147.185.221.27";
@@ -87,7 +87,7 @@ public class LaunchMenuHandlers : MonoBehaviour
 
         // This is for TSS, make sure ur in team in web panel 
         // off by one, this will be team 7 on the panel
-        team = 6;
+        team = 0; // first to go
 
         // Print Hostname to Logs
         Debug.Log("Button Pressed: " + host);

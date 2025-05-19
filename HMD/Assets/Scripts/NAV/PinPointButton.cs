@@ -52,7 +52,7 @@ public class PinPointButton : MonoBehaviour
     private bool isHazardPinButtonPressed = false;
     private bool isSamplePinButtonPressed = false;
     private const float VISIBILITY_DISTANCE = 50f;
-    private string tags;
+    private string type;
 
  
 
@@ -140,8 +140,6 @@ public class PinPointButton : MonoBehaviour
     {
         if (isGeneralPinButtonPressed)
         {
-
-
             generalPinCount++;
             if (namePin != null)
             {
@@ -151,7 +149,7 @@ public class PinPointButton : MonoBehaviour
             {
                 labelText = $"General {generalPinCount}: ";
             }
-            tags = "General";
+            type = "General";
             PlacePin(pinPointIconPrefab);
             isGeneralPinButtonPressed = false;
         }
@@ -166,7 +164,7 @@ public class PinPointButton : MonoBehaviour
             {
                 labelText = $"Hazard {hazardPinCount}: ";
             }
-            tags = "Hazard";
+            type = "Hazard";
             PlacePin(hazardPinPrefab);
             isHazardPinButtonPressed = false;
         }
@@ -182,7 +180,7 @@ public class PinPointButton : MonoBehaviour
                 labelText = $"Sample {samplePinCount}: ";
             }
 
-            tags = "Sample";
+            type = "Sample";
             PlacePin(samplePinPrefab);
             isSamplePinButtonPressed = false;
         }
@@ -198,7 +196,6 @@ public class PinPointButton : MonoBehaviour
         isGeneralPinButtonPressed = true;
         isHazardPinButtonPressed = false;
         isSamplePinButtonPressed = false;
-        PinRegistry.AddPin(new PinData(-5879, -10000, labelText, new string[0], "", "general", 0, clip));
         HighlightButton(generalPinBackplate);
         UnhighlightButton(hazardPinBackplate);
         UnhighlightButton(samplePinBackplate);
@@ -297,8 +294,12 @@ public class PinPointButton : MonoBehaviour
                 float x = imuDataHandler.GetPosx(evaKey) + pinPosition.x;
                 float y = imuDataHandler.GetPosy(evaKey) + pinPosition.y;
 
-                PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", tags, 0, clip));
-                distanceText.text = $"Name: {labelText}\nType: {tags}X: {x}\nY: {y} ";
+                if (recording)
+                {
+                    StopRec();
+                }
+                PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", type, 0, clip));
+                distanceText.text = $"Name: {labelText}\nType: {type}X: {x}\nY: {y} ";
             }
         }
     }

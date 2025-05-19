@@ -44,6 +44,40 @@ public static class PinRegistry
     // Anyone can read; only your pin‑placing code should write.
     public static readonly List<PinData> Pins = new List<PinData>();
 
-    public static void AddPin(PinData data) => Pins.Add(data);
+    public static void AddPin(PinData data)
+    {
+        Pins.Add(data);
+        
+        // Find the ApiService component in the scene
+        ApiService apiService = GameObject.FindObjectOfType<ApiService>();
+        if (apiService == null)
+        {
+            Debug.LogError("ApiService not found in scene. Cannot upload pin data.");
+            return;
+        }
+        
+        // Check if audio clip is null
+        if (data.localAudioClip == null)
+        {
+            // Set audioId to 0 and post POI directly
+            PinData updatedData = data;
+            updatedData.audioId = 0;
+            apiService.StartCoroutine(apiService.PostPOI(updatedData));
+        }
+        else
+        {
+            // Upload audio file first, then post POI with the resulting audio ID
+            string fileName = "audio_" + System.DateTime.Now.Ticks;
+            apiService.StartCoroutine(apiService.PostAudioFile(data.localAudioClip, fileName, (audioId) => {
+                // Update the pin data with the new audio ID
+                PinData updatedData = data;
+                updatedData.audioId = audioId;
+                
+                // Now post the POI with the audio ID
+                apiService.StartCoroutine(apiService.PostPOI(updatedData));
+            }));
+        }
+    }
+    
     public static void Clear() => Pins.Clear();
 }

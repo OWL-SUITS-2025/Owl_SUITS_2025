@@ -47,7 +47,8 @@ public class TSScConnection : MonoBehaviour
     public void ConnectToHost(string host, int team_number)
     {
         this.host = host;
-        this.port = "24329";
+        //this.port = "14141"; // NASA
+        this.port = "24329";  // Israel
         this.team_number = team_number;
         this.url = "http://" + this.host + ":" + this.port;
         Debug.Log("Connecting to TSSc with URL: " + this.url);
