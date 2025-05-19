@@ -174,11 +174,7 @@ MonoBehaviour:
     m_StyleName: Regular
     m_PointSize: 86
     m_Scale: 1
-<<<<<<< Updated upstream
-    m_UnitsPerEM: 0
-=======
     m_UnitsPerEM: 2048
->>>>>>> Stashed changes
     m_LineHeight: 98.8916
     m_AscentLine: 77.853516
     m_CapLine: 59
@@ -240,9 +236,6 @@ MonoBehaviour:
   m_FontFeatureTable:
     m_MultipleSubstitutionRecords: []
     m_LigatureSubstitutionRecords: []
-<<<<<<< Updated upstream
-    m_GlyphPairAdjustmentRecords: []
-=======
     m_GlyphPairAdjustmentRecords:
     - m_FirstAdjustmentRecord:
         m_GlyphIndex: 3
@@ -394,7 +387,6 @@ MonoBehaviour:
           m_XAdvance: 0
           m_YAdvance: 0
       m_FeatureLookupFlags: 0
->>>>>>> Stashed changes
     m_MarkToBaseAdjustmentRecords: []
     m_MarkToMarkAdjustmentRecords: []
   m_ShouldReimportFontFeatures: 0
@@ -486,15 +478,9 @@ Texture2D:
     Hash: 00000000000000000000000000000000
   m_IsAlphaChannelOptional: 0
   serializedVersion: 3
-<<<<<<< Updated upstream
-  m_Width: 0
-  m_Height: 0
-  m_CompleteImageSize: 0
-=======
   m_Width: 1
   m_Height: 1
   m_CompleteImageSize: 1
->>>>>>> Stashed changes
   m_MipsStripped: 0
   m_TextureFormat: 1
   m_MipCount: 1
@@ -519,13 +505,8 @@ Texture2D:
   m_LightmapFormat: 0
   m_ColorSpace: 0
   m_PlatformBlob: 
-<<<<<<< Updated upstream
-  image data: 0
-  _typelessdata: 
-=======
   image data: 1
   _typelessdata: 00
->>>>>>> Stashed changes
   m_StreamData:
     serializedVersion: 2
     offset: 0

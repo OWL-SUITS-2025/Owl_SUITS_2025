@@ -2,22 +2,41 @@
 using UnityEngine;
 
 /// Central list that remembers every pin you drop.
-/// Feel free to extend PinData with timestamp, label, etc.
+/// Formatted to be compatible with the backend API
+[System.Serializable]
 public struct PinData
 {
-    public float mapX, mapY;      // 2‑D coords in your map’s system
-    public string tags;
-    public string name;
-    public AudioClip clip;
-   
+    public float x, y;           // 2‑D coords matching API format
+    public string name;          // Name of the POI
+    public string[] tags;        // Tags as string array
+    public string description;   // Description of the POI 
+    public string type;          // Type of the POI
+    public int audioId;          // ID of the associated audio clip
 
+    // Reference to the local AudioClip (not sent to API)
+    [System.NonSerialized]
+    public AudioClip localAudioClip;
 
-    public PinData(float x, float y, string n, string t, AudioClip c)
+    public PinData(float xPos, float yPos, string pinName, string[] pinTags, string pinDescription, string pinType, int pinAudioId, AudioClip clip = null)
     {
-        mapX = x; mapY = y; tags = t; name = n; clip = c; 
+        x = xPos;
+        y = yPos;
+        name = pinName;
+        tags = pinTags;
+        description = pinDescription;
+        type = pinType;
+        audioId = pinAudioId;
+        localAudioClip = clip;
     }
-   
-   
+
+    // Helper method to convert string tags to string array
+    public static string[] ParseTags(string tagString)
+    {
+        if (string.IsNullOrEmpty(tagString))
+            return new string[0];
+
+        return tagString.Split(',');
+    }
 }
 
 public static class PinRegistry
