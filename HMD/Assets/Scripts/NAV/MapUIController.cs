@@ -22,6 +22,7 @@ public class MapUIController : MonoBehaviour
     [Header("UI References")]
     [Tooltip("The panel (or GameObject) that contains your 2D map.")]
     [SerializeField] private GameObject mapPanel;
+    [SerializeField] private GameObject legend;
 
     [Tooltip("Button that opens the 2D map.")]
     [SerializeField] private StatefulInteractable accessMapButton;
@@ -41,6 +42,7 @@ public class MapUIController : MonoBehaviour
         mapPanel.SetActive(false);
         backButton.gameObject.SetActive(false);
         accessMapButton.gameObject.SetActive(true);
+        legend.gameObject.SetActive(false);
 
         accessMapButton.OnClicked.AddListener(() => ShowMap()); 
         backButton.OnClicked.AddListener(() => HideMap()); 
@@ -51,6 +53,7 @@ public class MapUIController : MonoBehaviour
         // show map + back, hide access button
         mapPanel.SetActive(true);
         backButton.gameObject.SetActive(true);
+        legend.SetActive(true);
         accessMapButton.gameObject.SetActive(false);
 
         // hide everything else in the list
@@ -64,6 +67,7 @@ public class MapUIController : MonoBehaviour
         // hide map + back, show access button
         mapPanel.SetActive(false);
         backButton.gameObject.SetActive(false);
+        legend.SetActive(false);
         accessMapButton.gameObject.SetActive(true);
 
         // restore visibility of everything else
