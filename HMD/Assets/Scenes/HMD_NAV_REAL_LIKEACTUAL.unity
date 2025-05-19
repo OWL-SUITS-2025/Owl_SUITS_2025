@@ -42215,7 +42215,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapPanel: {fileID: 1001771093}
-  legend: {fileID: 0}
+  legend: {fileID: 1447322776}
   accessMapButton: {fileID: 715595979}
   backButton: {fileID: 1901409364}
   objectsToHide:

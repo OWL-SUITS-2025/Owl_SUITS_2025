@@ -281,15 +281,15 @@ public class PinPointButton : MonoBehaviour
 
         if (validPosition )
         {
+
             GameObject pin = Instantiate(pinPrefab, pinPosition, Quaternion.identity);
             pin.tag = "Pin";
-
-            TMP_Text distanceText = pin.GetComponentInChildren<TMP_Text>();
 
             if (pinPrefab == pinPointIconPrefab) UnhighlightButton(generalPinBackplate);
             if (pinPrefab == hazardPinPrefab) UnhighlightButton(hazardPinBackplate);
             if (pinPrefab == samplePinPrefab) UnhighlightButton(samplePinBackplate);
 
+            TMP_Text distanceText = pin.GetComponentInChildren<TMP_Text>();
             int evaNumber = evaNumberHandler != null ? evaNumberHandler.getEVANumber() : 0;
             string evaKey = "eva" + evaNumber;
 
@@ -300,7 +300,11 @@ public class PinPointButton : MonoBehaviour
                 float y = imuDataHandler.GetPosy(evaKey) + pinPosition.y;
 
                 PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", tags, 0, clip));
-                distanceText.text = $"Name: {labelText}\nType: {tags}X: {x}\nY: {y} ";
+
+                
+            distanceText.text = $"Name: {labelText}\nType: {tags}X: {x}\nY: {y} ";
+
+            
             }
         }
     }

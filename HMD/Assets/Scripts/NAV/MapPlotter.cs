@@ -20,6 +20,7 @@ public class MapPinOverlay : MonoBehaviour
     [SerializeField] float refreshInterval = 1f;
 
     Dictionary<int, GameObject> pinInstances = new Dictionary<int, GameObject>();
+    
 
     void OnEnable() => StartCoroutine(UpdateLoop());
     void OnDisable() => StopAllCoroutines();
@@ -31,9 +32,12 @@ public class MapPinOverlay : MonoBehaviour
 
     IEnumerator UpdateLoop()
     {
+        GameObject pin = Instantiate(selfPrefab, mapRect, false);
+        pin.SetActive(false);
         while (true)
         {
             UpdatePins();
+            person(pin);
             yield return new WaitForSeconds(refreshInterval);
         }
     }
@@ -91,7 +95,6 @@ public class MapPinOverlay : MonoBehaviour
             pin.GetComponent<RectTransform>().localPosition = new Vector2(px, py);
         }
 
-        //person();
         
 
 
@@ -100,7 +103,7 @@ public class MapPinOverlay : MonoBehaviour
 
     }
 
-    private void person()
+    private void person(GameObject pin)
     {
         int evaNumber = evaNumberHandler != null ? evaNumberHandler.getEVANumber() : 0;
         string evaKey = "eva" + evaNumber;
@@ -122,8 +125,9 @@ public class MapPinOverlay : MonoBehaviour
             float px = u * mapRect.rect.width;
             float py = v * mapRect.rect.height;
 
-            GameObject pin = Instantiate(selfPrefab, mapRect, false);
+
             pin.GetComponent<RectTransform>().anchoredPosition = new Vector2(px, py);
+            pin.SetActive(true);
 
 
         }
