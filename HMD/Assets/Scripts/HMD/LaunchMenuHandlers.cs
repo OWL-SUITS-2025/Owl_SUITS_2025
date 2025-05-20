@@ -80,7 +80,7 @@ public class LaunchMenuHandlers : MonoBehaviour
         host = "147.185.221.27";
 
         // Using local computer:
-        //host = "127.0.0.1";
+        // host = "127.0.0.1";
 
         // Using fifth wifi
         //host = "192.168.0.128";
