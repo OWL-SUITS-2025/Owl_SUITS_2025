@@ -39,7 +39,7 @@ public class PinPointButton : MonoBehaviour
     private int hazardPinCount = 0;
     private string labelText;
 
-    public TextMeshProUGUI namePin; // text box (name for pin)
+    [SerializeField]  private ROVERDataHandler roverDataHandler;
 
     [Header("Events")]
     public UnityEvent onGeneralPinClick = new UnityEvent();
@@ -53,7 +53,8 @@ public class PinPointButton : MonoBehaviour
     private bool isHazardPinButtonPressed = false;
     private bool isSamplePinButtonPressed = false;
     private const float VISIBILITY_DISTANCE = 50f;
-    private string tags;
+    private string type;
+    private bool isPing = false;
 
  
 
@@ -61,9 +62,6 @@ public class PinPointButton : MonoBehaviour
 
 
     private KeywordRecognitionSubsystem keywordRecognitionSubsystem = null;
-
-    [SerializeField] TextMeshPro recordLabel; // “Record / Stop” text
-    [SerializeField] TextMeshPro plate;  // icon
 
     bool recording;
     string micDevice;
@@ -85,7 +83,6 @@ public class PinPointButton : MonoBehaviour
         clip = Microphone.Start(micDevice, false, 300, 44100); // up to 5 min
         recording = true;
 
-        if (recordLabel) recordLabel.text = "Stop";
     }
 
     void StopRec()
@@ -93,7 +90,6 @@ public class PinPointButton : MonoBehaviour
         Microphone.End(micDevice);
         recording = false;
 
-        if (recordLabel) recordLabel.text = "Record";
 
     }
 
@@ -120,6 +116,59 @@ public class PinPointButton : MonoBehaviour
             Debug.LogWarning("PinPointSpeechCommands: KeywordRecognitionSubsystem not found. Speech commands will not work.");
         }
 
+       
+
+        while (!isPing)
+        {
+
+            isPing = roverDataHandler.GetPing();
+            if (isPing)
+            {
+                PlacePOI("POI 1", new Vector2(roverDataHandler.GetPOI1x(), roverDataHandler.GetPOI1y()));
+                PlacePOI("POI 2", new Vector2(roverDataHandler.GetPOI2x(), roverDataHandler.GetPOI3y()));
+                PlacePOI("POI 3", new Vector2(roverDataHandler.GetPOI3x(), roverDataHandler.GetPOI3y()));
+            }
+        }
+
+    }
+
+    private void PlacePOI(string labelText, Vector2 POImap)
+    {
+
+        
+        int evaNumber = evaNumberHandler != null ? evaNumberHandler.getEVANumber() : 0;
+        string evaKey = "eva" + evaNumber;
+
+        // Only proceed if we have a valid EVA number
+        if (evaNumber == 1 || evaNumber == 2)
+        {
+            float x = imuDataHandler.GetPosx(evaKey);
+            float y = imuDataHandler.GetPosy(evaKey);
+
+
+                // Get the camera's position (user's head)
+            Vector3 currUnity = Camera.main.transform.position;
+            Vector2 currUnity2 = new Vector2(currUnity.x, currUnity.y);
+            Vector2 currMap = new Vector2(x, y);
+
+            Vector2 POIunity = (POImap - currMap) + currUnity2;
+
+            Vector3 pinPosition = new Vector3(POIunity.x, POIunity.y, currUnity.z);
+
+
+
+            GameObject pin = Instantiate(pinPointIconPrefab, pinPosition, Quaternion.identity);
+            pin.tag = "Pin";
+            pin.transform.SetParent(parentObject, worldPositionStays: true); // Set parent
+
+            TMP_Text distanceText = pin.GetComponentInChildren<TMP_Text>();
+
+
+            distanceText.text = $"Name:{labelText}\nType: {type}\nX: {pinPosition.x}\nY: {pinPosition.y} ";
+
+
+
+        }
     }
 
     private void OnDestroy()
@@ -144,46 +193,31 @@ public class PinPointButton : MonoBehaviour
 
 
             generalPinCount++;
-            if (namePin != null)
-            {
-                labelText = namePin.text;
-            }
-            else
-            {
+       
                 labelText = $"General {generalPinCount}: ";
-            }
-            tags = "General";
+          
+            type = "General";
             PlacePin(pinPointIconPrefab);
             isGeneralPinButtonPressed = false;
         }
         else if (isHazardPinButtonPressed)
         {
             hazardPinCount++;
-            if (namePin != null)
-            {
-                labelText = namePin.text;
-            }
-            else
-            {
-                labelText = $"Hazard {hazardPinCount}: ";
-            }
-            tags = "Hazard";
+           
+            labelText = $"Hazard {hazardPinCount}: ";
+            
+            type = "Hazard";
             PlacePin(hazardPinPrefab);
             isHazardPinButtonPressed = false;
         }
         else if (isSamplePinButtonPressed)
         {
             samplePinCount++;
-            if (namePin != null)
-            {
-                labelText = namePin.text;
-            }
-            else
-            {
-                labelText = $"Sample {samplePinCount}: ";
-            }
+            
+            labelText = $"Sample {samplePinCount}: ";
+            
 
-            tags = "Sample";
+            type = "Sample";
             PlacePin(samplePinPrefab);
             isSamplePinButtonPressed = false;
         }
@@ -199,9 +233,7 @@ public class PinPointButton : MonoBehaviour
         isGeneralPinButtonPressed = true;
         isHazardPinButtonPressed = false;
         isSamplePinButtonPressed = false;
-        PinRegistry.AddPin(new PinData(-5600, -10020, labelText, new string[0], "", "general", 0, clip));
-        PinRegistry.AddPin(new PinData(-5700, -10000, labelText, new string[0], "", "hazard", 0, clip));
-        PinRegistry.AddPin(new PinData(-5800, -10010, labelText, new string[0], "", "sample", 0, clip));
+     
         HighlightButton(generalPinBackplate);
         UnhighlightButton(hazardPinBackplate);
         UnhighlightButton(samplePinBackplate);
@@ -232,11 +264,7 @@ public class PinPointButton : MonoBehaviour
         isGeneralPinButtonPressed = false;
         isHazardPinButtonPressed = false;
         isSamplePinButtonPressed = false;
-        if (recording)
-        {
-            StopRec();
-        }
-        UnhighlightButton(samplePinBackplate);
+               UnhighlightButton(samplePinBackplate);
         UnhighlightButton(generalPinBackplate);
         UnhighlightButton(hazardPinBackplate);
     }
@@ -255,33 +283,14 @@ public class PinPointButton : MonoBehaviour
 
     private void PlacePin(GameObject pinPrefab)
     {
-        Vector3 pinPosition;
-        bool validPosition = false;
-        
-        // Try using raycast first
-        if (rayInteractor != null && rayInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit))
-        {
-            Vector3 hitPoint = hit.point;
-            Debug.Log($"Hit point: {hitPoint}");
-            float headsetHeight = Camera.main.transform.position.y;
-            pinPosition = new Vector3(hitPoint.x, headsetHeight - 0.5f, hitPoint.z);
-            validPosition = true;
-        }
-        else
-        {
-            // Fallback: Place pin exactly at the head position
-            Debug.Log("Raycast failed. Using fallback to place pin at head position.");
-            
+       
+           
             // Get the camera's position (user's head)
             Vector3 headPosition = Camera.main.transform.position;
-            
-            // Use the exact head position
-            pinPosition = headPosition + Camera.main.transform.forward * 0.5f;
-            validPosition = true;
-        }
 
-        if (validPosition )
-        {
+        // Use the exact head position
+        Vector3 pinPosition = headPosition + Camera.main.transform.forward * 0.5f;
+           
 
             GameObject pin = Instantiate(pinPrefab, pinPosition, Quaternion.identity);
             pin.tag = "Pin";
@@ -301,14 +310,15 @@ public class PinPointButton : MonoBehaviour
                 float x = imuDataHandler.GetPosx(evaKey) + pinPosition.x;
                 float y = imuDataHandler.GetPosy(evaKey) + pinPosition.y;
 
-                PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", tags, 0, clip));
+            
+                PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", type, 0, null));
 
                 
-            distanceText.text = $"Name:{labelText}\nType: {tags}\nX: {x}\nY: {y} ";
+            distanceText.text = $"Name:{labelText}\nType: {type}\nX: {x}\nY: {y} ";
 
             
             }
-        }
+        
     }
 
 

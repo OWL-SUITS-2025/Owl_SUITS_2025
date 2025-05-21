@@ -21,6 +21,13 @@ public class ROVERData
     public float posx;
     public float posy;
     public int qr_id;
+    public float poi_1_x;
+    public float poi_1_y;
+    public float poi_2_x;
+    public float poi_2_y;
+    public float poi_3_x;
+    public float poi_3_y;
+    public bool ping;
 
 }
 
@@ -71,5 +78,33 @@ void Update()
     public int GetQR_id()
     {
         return roverWrapper.rover.qr_id;
+    }
+    public float GetPOI1x()
+    {
+        return roverWrapper.rover.poi_1_x;
+    }
+    public float GetPOI1y()
+    {
+        return roverWrapper.rover.poi_1_y;
+    }
+    public float GetPOI2x()
+    {
+        return roverWrapper.rover.poi_2_x;
+    }
+    public float GetPOI2y()
+    {
+        return roverWrapper.rover.poi_2_y;
+    }
+    public float GetPOI3x()
+    {
+        return roverWrapper.rover.poi_3_x;
+    }
+    public float GetPOI3y()
+    {
+        return roverWrapper.rover.poi_3_y;
+    }
+    public bool GetPing()
+    {
+        return roverWrapper.rover.ping;
     }
 }

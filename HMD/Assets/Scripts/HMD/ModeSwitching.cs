@@ -1,77 +1,7 @@
-// using System.Collections;
-// using System.Collections.Generic;
-// using UnityEngine;
-// using TMPro;
-
-// public class ModeSwitching : MonoBehaviour
-// {
-//     public GameObject egressHUD;
-//     public GameObject geoHUD;
-//     public GameObject navigationHUD;
-//     public GameObject ingressHUD;
-
-//     public TextMeshPro modeTextMeshPro;
-
-//     private void Start()
-//     {
-//         // Disable all HUDs initially
-//         DisableAllHUDs();
-//     }
-
-//     private void DisableAllHUDs()   
-//     {
-//         egressHUD.SetActive(false);
-//         geoHUD.SetActive(false);
-//         navigationHUD.SetActive(false);
-//         ingressHUD.SetActive(false);
-//     }
-
-//     public void ToggleEgressMode()
-//     {
-//         DisableAllHUDs();
-//         egressHUD.SetActive(true);
-//         UpdateModeText("EGRESS IN PROGRESS", Color.green);
-//     }
-
-//     public void ToggleGeoMode()
-//     {
-//         DisableAllHUDs();
-//         geoHUD.SetActive(true);
-//         UpdateModeText("GEO IN PROGRESS", Color.red);
-//     }
-
-//     public void ToggleNavigationMode()
-//     {
-//         DisableAllHUDs();
-//         navigationHUD.SetActive(true);
-//         UpdateModeText("NAVIGATION IN PROGRESS", Color.blue);
-//     }
-
-//     public void ToggleIngressMode()
-//     {
-//         DisableAllHUDs();
-//         ingressHUD.SetActive(true);
-//         UpdateModeText("INGRESS IN PROGRESS", Color.magenta);
-//     }
-
-//     private void UpdateModeText(string modeText, Color textColor)
-//     {
-//         if (modeTextMeshPro != null)
-//         {
-//             modeTextMeshPro.text = modeText;
-//             modeTextMeshPro.color = textColor;
-//         }
-//     }
-// }
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using System;
-using Microsoft.MixedReality.Toolkit.UI;
-using MixedReality.Toolkit;
-using MixedReality.Toolkit.UX;
 
 public class ModeSwitching : MonoBehaviour
 {
@@ -79,7 +9,6 @@ public class ModeSwitching : MonoBehaviour
     public GameObject geoHUD;
     public GameObject navigationHUD;
     public GameObject ingressHUD;
-    public GameObject meshVisualizer;
 
     public TextMeshPro modeTextMeshPro;
 
@@ -89,18 +18,12 @@ public class ModeSwitching : MonoBehaviour
         DisableAllHUDs();
     }
 
-    private void DisableAllHUDs()   
+    private void DisableAllHUDs()
     {
         egressHUD.SetActive(false);
         geoHUD.SetActive(false);
         navigationHUD.SetActive(false);
         ingressHUD.SetActive(false);
-        
-        // Ensure mesh visualizer is off when disabling HUDs
-        if (meshVisualizer != null)
-        {
-            meshVisualizer.SetActive(false);
-        }
     }
 
     public void ToggleEgressMode()
@@ -121,13 +44,6 @@ public class ModeSwitching : MonoBehaviour
     {
         DisableAllHUDs();
         navigationHUD.SetActive(true);
-        
-        // Activate the mesh visualizer only in navigation mode
-        if (meshVisualizer != null)
-        {
-            meshVisualizer.SetActive(true);
-        }
-        
         UpdateModeText("NAVIGATION IN PROGRESS", Color.blue);
     }
 
