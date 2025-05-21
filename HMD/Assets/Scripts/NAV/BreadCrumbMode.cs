@@ -15,7 +15,6 @@ namespace Microsoft.MixedReality.Toolkit.UI
         [SerializeField] private IMUDataHandler imuDataHandler;        // drag your IMUDataHandler
         [SerializeField] private EVANumberHandler evaNumberHandler;
         // Used for highlighting when a mode is currently activated
-        [SerializeField] private GameObject breadCrumbBackplate;
         public TextMeshPro breadCrumbStatusText;
       
 
@@ -37,13 +36,9 @@ namespace Microsoft.MixedReality.Toolkit.UI
             {
                 // Start auto drop if it is active
                 StartCoroutine(AutoDropBreadcrumbs());
-                HighlightButton(breadCrumbBackplate);
+                
             }
-            else
-            {
-                // Unhighlight button if breadcrumb mode is not active
-                UnhighlightButton(breadCrumbBackplate);
-            }
+           
             UpdateBreadcrumbStatusText(); // Update the status text
         }
 
@@ -101,23 +96,6 @@ namespace Microsoft.MixedReality.Toolkit.UI
             }
         }
 
-        private void HighlightButton(GameObject backplate)
-        {
-            // Activate the transparent yellow backplate
-            if (backplate != null)
-            {
-                backplate.SetActive(true);
-            }
-        }
-
-        private void UnhighlightButton(GameObject backplate)
-        {
-            // Deactivate the transparent yellow backplate
-            if (backplate != null)
-            {
-                backplate.SetActive(false);
-            }
-        }
 
     }
 }
