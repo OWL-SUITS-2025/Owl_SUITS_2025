@@ -316,7 +316,7 @@ public class PinPointButton : MonoBehaviour
             PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", type, 0, clip));
 
 
-            distanceText.text = $"Name:{labelText}\nType: {type}\nX: {x}\nY: {y} ";
+            distanceText.text = $"Name:\n{labelText}\nType:\n{type}\nX: {x}\nY: {y} ";
 
 
         }
