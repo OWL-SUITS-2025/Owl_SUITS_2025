@@ -4003,8 +4003,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   telemetryDataHandler: {fileID: 1802948748}
-  oxygenTimeLeftTextMeshPro: {fileID: 1727652732}
   evaNumberHandler: {fileID: 938311192}
+  ev1OxygenTimeLeftTextMeshPro: {fileID: 0}
+  ev2OxygenTimeLeftTextMeshPro: {fileID: 0}
 --- !u!114 &152013460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4019,13 +4020,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   telemetryDataHandler: {fileID: 1802948748}
   dataRanges: {fileID: 1740614478}
-  background: {fileID: 247889074}
-  foreground: {fileID: 655206682}
-  oxygenLevelTextMeshPro: {fileID: 1164574788}
+  evaNumberHandler: {fileID: 938311192}
+  ev1background: {fileID: 0}
+  ev1foreground: {fileID: 0}
+  ev1oxygenLevelTextMeshPro: {fileID: 0}
+  ev2background: {fileID: 0}
+  ev2foreground: {fileID: 0}
+  ev2oxygenLevelTextMeshPro: {fileID: 0}
   normalColor: {r: 0, g: 1, b: 0, a: 1}
   warningColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   criticalColor: {r: 1, g: 0, b: 0, a: 1}
-  evaNumberHandler: {fileID: 938311192}
 --- !u!114 &152013461
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4040,13 +4044,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   telemetryDataHandler: {fileID: 1802948748}
   dataRanges: {fileID: 1740614478}
-  background: {fileID: 1064142132}
-  foreground: {fileID: 1747396423}
-  oxygenLevelTextMeshPro: {fileID: 1530046005}
+  evaNumberHandler: {fileID: 938311192}
+  ev1background: {fileID: 0}
+  ev1foreground: {fileID: 0}
+  ev1oxygenLevelTextMeshPro: {fileID: 0}
+  ev2background: {fileID: 0}
+  ev2foreground: {fileID: 0}
+  ev2oxygenLevelTextMeshPro: {fileID: 0}
   normalColor: {r: 0, g: 1, b: 0, a: 1}
   warningColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   criticalColor: {r: 1, g: 0, b: 0, a: 1}
-  evaNumberHandler: {fileID: 938311192}
 --- !u!1 &153045552
 GameObject:
   m_ObjectHideFlags: 0
@@ -33930,7 +33937,6 @@ MonoBehaviour:
   geoHUD: {fileID: 1825689327}
   navigationHUD: {fileID: 830388938}
   ingressHUD: {fileID: 1086673520}
-  repairHUD: {fileID: 1103628756}
   modeTextMeshPro: {fileID: 1435867925}
 --- !u!4 &1558979423
 Transform:

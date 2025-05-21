@@ -24,6 +24,7 @@ public class PinPointButton : MonoBehaviour
     [SerializeField] private GameObject pinPointIconPrefab;
     [SerializeField] private GameObject hazardPinPrefab;
     [SerializeField] private GameObject samplePinPrefab;
+    [SerializeField] private Transform parentObject; // The parent object to which the pin will be attached
 
     [Header("Buttons")]
     [SerializeField] private StatefulInteractable generalPinBackplate;
@@ -284,6 +285,7 @@ public class PinPointButton : MonoBehaviour
 
             GameObject pin = Instantiate(pinPrefab, pinPosition, Quaternion.identity);
             pin.tag = "Pin";
+            pin.transform.SetParent(parentObject, worldPositionStays: true); // Set parent
 
             if (pinPrefab == pinPointIconPrefab) UnhighlightButton(generalPinBackplate);
             if (pinPrefab == hazardPinPrefab) UnhighlightButton(hazardPinBackplate);
@@ -302,7 +304,7 @@ public class PinPointButton : MonoBehaviour
                 PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", tags, 0, clip));
 
                 
-            distanceText.text = $"Name: {labelText}\nType: {tags}X: {x}\nY: {y} ";
+            distanceText.text = $"Name:{labelText}\nType: {tags}\nX: {x}\nY: {y} ";
 
             
             }
