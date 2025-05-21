@@ -24,6 +24,7 @@ public class PinPointButton : MonoBehaviour
     [SerializeField] private GameObject pinPointIconPrefab;
     [SerializeField] private GameObject hazardPinPrefab;
     [SerializeField] private GameObject samplePinPrefab;
+    [SerializeField] private Transform parentObject; // The parent object to which the pin will be attached
 
     [Header("Buttons")]
     [SerializeField] private StatefulInteractable generalPinBackplate;
@@ -196,6 +197,9 @@ public class PinPointButton : MonoBehaviour
         isGeneralPinButtonPressed = true;
         isHazardPinButtonPressed = false;
         isSamplePinButtonPressed = false;
+        PinRegistry.AddPin(new PinData(-5600, -10020, labelText, new string[0], "", "general", 0, clip));
+        PinRegistry.AddPin(new PinData(-5700, -10000, labelText, new string[0], "", "hazard", 0, clip));
+        PinRegistry.AddPin(new PinData(-5800, -10010, labelText, new string[0], "", "sample", 0, clip));
         HighlightButton(generalPinBackplate);
         UnhighlightButton(hazardPinBackplate);
         UnhighlightButton(samplePinBackplate);
@@ -270,21 +274,22 @@ public class PinPointButton : MonoBehaviour
             Vector3 headPosition = Camera.main.transform.position;
             
             // Use the exact head position
-            pinPosition = new Vector3(headPosition.x-0.5f, headPosition.y - 0.5f, headPosition.z);
+            pinPosition = headPosition + Camera.main.transform.forward * 0.5f;
             validPosition = true;
         }
 
-        if (validPosition && !IsPinTooCloseToExistingPin(pinPosition))
+        if (validPosition )
         {
+
             GameObject pin = Instantiate(pinPrefab, pinPosition, Quaternion.identity);
             pin.tag = "Pin";
-
-            TMP_Text distanceText = pin.GetComponentInChildren<TMP_Text>();
+            pin.transform.SetParent(parentObject, worldPositionStays: true); // Set parent
 
             if (pinPrefab == pinPointIconPrefab) UnhighlightButton(generalPinBackplate);
             if (pinPrefab == hazardPinPrefab) UnhighlightButton(hazardPinBackplate);
             if (pinPrefab == samplePinPrefab) UnhighlightButton(samplePinBackplate);
 
+            TMP_Text distanceText = pin.GetComponentInChildren<TMP_Text>();
             int evaNumber = evaNumberHandler != null ? evaNumberHandler.getEVANumber() : 0;
             string evaKey = "eva" + evaNumber;
 
@@ -294,28 +299,15 @@ public class PinPointButton : MonoBehaviour
                 float x = imuDataHandler.GetPosx(evaKey) + pinPosition.x;
                 float y = imuDataHandler.GetPosy(evaKey) + pinPosition.y;
 
-                if (recording)
-                {
-                    StopRec();
-                }
-                PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", type, 0, clip));
-                distanceText.text = $"Name: {labelText}\nType: {type}X: {x}\nY: {y} ";
+                PinRegistry.AddPin(new PinData(x, y, labelText, new string[0], "", tags, 0, clip));
+
+                
+            distanceText.text = $"Name:{labelText}\nType: {tags}\nX: {x}\nY: {y} ";
+
+            
             }
         }
     }
 
 
-
-    private bool IsPinTooCloseToExistingPin(Vector3 pinPosition)
-    {
-        float minDistance = 0.5f;
-        foreach (GameObject existingPin in GameObject.FindGameObjectsWithTag("Pin"))
-        {
-            if (Vector3.Distance(pinPosition, existingPin.transform.position) < minDistance)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
 }

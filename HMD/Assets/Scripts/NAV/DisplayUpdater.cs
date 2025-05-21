@@ -39,7 +39,45 @@ public class DisplayUpdater : MonoBehaviour
 
                 // show with two digits after the decimal: 12.34
                 xyField.text = $"X: {x:F2} m\nY: {y:F2} m";
-                heading.text = $"{head:F2}";
+
+               
+               
+
+                // each sector is 45°, boundaries at 22.5°, 67.5°, 112.5°, …
+                if (head >= 337.5f || head < 22.5f)
+                {
+                    heading.text = "N";
+                }
+                else if (head < 67.5f)
+                {
+                    heading.text = "NE";
+                }
+                else if (head < 112.5f)
+                {
+                    heading.text = "E";
+                }
+                else if (head < 157.5f)
+                {
+                    heading.text = "SE";
+                }
+                else if (head < 202.5f)
+                {
+                    heading.text = "S";
+                }
+                else if (head < 247.5f)
+                {
+                    heading.text = "SW";
+                }
+                else if (head < 292.5f)
+                {
+                    heading.text = "W";
+                }
+                else  // head < 337.5f
+                {
+                    heading.text = "NW";
+                }
+
+
 
             }
             else

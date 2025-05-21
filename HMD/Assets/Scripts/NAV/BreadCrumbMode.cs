@@ -11,7 +11,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
     {
         [SerializeField] private GameObject breadcrumbPrefab; // Drag your breadcrumb prefab here
         [SerializeField] private float distanceThreshold = 5f; // Adjust the distance threshold as needed
-
+        [SerializeField] private Transform parentObject; 
         [SerializeField] private IMUDataHandler imuDataHandler;        // drag your IMUDataHandler
         [SerializeField] private EVANumberHandler evaNumberHandler;
         // Used for highlighting when a mode is currently activated
@@ -67,6 +67,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
                     // Drop a breadcrumb at the current position
                     GameObject breadcrumb = Instantiate(breadcrumbPrefab, Camera.main.transform.position, Quaternion.identity);
 
+                    breadcrumb.transform.SetParent(parentObject, worldPositionStays: true); // Set parent
 
                     // Assign the "Breadcrumb" tag to the dropped breadcrumb prefab
                     breadcrumb.tag = "Breadcrumb";
