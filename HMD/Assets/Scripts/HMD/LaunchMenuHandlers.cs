@@ -71,19 +71,9 @@ public class LaunchMenuHandlers : MonoBehaviour
         string host;
 
         int team;
-        // Use this to HARDCODE the server address
 
-        // Using NASA Rockyard IP:
-        //host = "192.168.51.110"; //NASA USE THIS!!!!!
-
-        // Using Local Server:
-        host = "147.185.221.27";
-
-        // Using local computer:
-        //host = "127.0.0.1";
-
-        // Using fifth wifi
-        //host = "192.168.0.128";
+        // Using Local Server: TYPE UR IP HERE
+        host = "1111";
 
         // This is for TSS, make sure ur in team in web panel 
         // off by one, this will be team 7 - 1 on the panel

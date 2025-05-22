@@ -196,7 +196,6 @@ public class TELEMETRYDataHandler : MonoBehaviour
         {
             // Check which EVA data is requested
             TelemetryEvaData evaData = (eva == "eva1") ? telemetryWrapper.telemetry.eva1 : telemetryWrapper.telemetry.eva2;
-
             // Access the oxy_pri_storage
             return evaData.oxy_pri_pressure;
         }
@@ -213,7 +212,6 @@ public class TELEMETRYDataHandler : MonoBehaviour
         {
             // Check which EVA data is requested
             TelemetryEvaData evaData = (eva == "eva1") ? telemetryWrapper.telemetry.eva1 : telemetryWrapper.telemetry.eva2;
-
             // Access the batt_time_left
             return evaData.oxy_sec_pressure;
         }
