@@ -160,10 +160,10 @@ public class FieldNoteHandler : MonoBehaviour
         // Cache components and setup essential data early
         cachedTransform = transform;
         audioSource = GetComponent<AudioSource>();
-        
+
         // Initialize current field note data early
         currentFieldNoteData = new FieldNoteData();
-        
+
         // Initialize threshold values based on the reference table
         InitializeThresholds();
     }
@@ -243,13 +243,13 @@ public class FieldNoteHandler : MonoBehaviour
         }
 
         ValidateReferences();
-        
+
         // Verify reference for playback slider
         if (playbackSlider != null)
         {
             // Register for the slider's ValueUpdated event
             playbackSlider.OnValueUpdated.AddListener(OnPlaybackSliderChanged);
-            
+
             // Use the StatefulInteractable's events for detecting interaction
             StatefulInteractable sliderInteractable = playbackSlider.GetComponent<StatefulInteractable>();
             if (sliderInteractable != null)
@@ -266,7 +266,10 @@ public class FieldNoteHandler : MonoBehaviour
 
         // Register event listeners for buttons and sliders
         RegisterEventListeners();
-        
+
+        // Register with camera manager for photo capture
+        CameraManager.Instance.RegisterFieldNote();
+
         // Initial update of field note data
         if (evaNumberHandler != null)
         {
@@ -282,28 +285,28 @@ public class FieldNoteHandler : MonoBehaviour
         if (specResultsText == null) Debug.LogError("SpecResultsText reference is not set.");
         if (sigIndicator == null) Debug.LogError("SigIndicator reference is not set.");
         else sigIndicator.color = Color.white; // Set default color
-        
+
         if (imuDataHandler == null) Debug.LogError("IMUDataHandler reference is not set.");
         if (telemetryDataHandler == null) Debug.LogError("TELEMETRYDataHandler reference is not set.");
         if (dateTimeLocationText == null) Debug.LogError("DateTimeLocationText reference is not set.");
-        
+
         if (tsscConnection == null) Debug.LogError("TSScConnection reference is not set.");
         if (evaNumberHandler == null) Debug.LogError("EVANumberHandler reference is not set.");
-        
+
         if (rockButton == null) Debug.LogError("Rock Button reference is not set.");
         if (regolithButton == null) Debug.LogError("Regolith Button reference is not set.");
         if (closeButton == null) Debug.LogError("Close Button reference is not set.");
-        
+
         if (grainSizeSlider == null) Debug.LogError("GrainSizeSlider reference is not set.");
         if (sortingSlider == null) Debug.LogError("SortingSlider reference is not set.");
         if (durabilitySlider == null) Debug.LogError("DurabilitySlider reference is not set.");
-        
+
         if (editButton == null) Debug.LogError("Edit Button reference is not set.");
         else editButton.OnClicked.AddListener(ToggleEditMode);
-        
+
         if (completeButton == null) Debug.LogError("Complete Button reference is not set.");
         else completeButton.OnClicked.AddListener(OnCompleteButtonClicked);
-        
+
         if (noteCardPrefab == null) Debug.LogError("NoteCard prefab reference is not set.");
         if (samplePhotoDisplay == null) Debug.LogWarning("SamplePhotoDisplay (UI.Image) is not assigned. Photo feature may not work.");
     }
@@ -329,35 +332,35 @@ public class FieldNoteHandler : MonoBehaviour
         {
             return;
         }
-        
+
         // Get the current recording position before stopping
         int position = Microphone.GetPosition(microphoneDevice);
-        
+
         // Stop recording
         Microphone.End(microphoneDevice);
-        
+
         if (audioSource.clip != null && position > 0)
         {
             // Create a new AudioClip with only the recorded portion (trimming silence)
             AudioClip originalClip = audioSource.clip;
             AudioClip trimmedClip = AudioClip.Create(
-                originalClip.name, 
-                position, 
-                originalClip.channels, 
-                originalClip.frequency, 
+                originalClip.name,
+                position,
+                originalClip.channels,
+                originalClip.frequency,
                 false);
-            
+
             // Get the audio data from the original clip
             float[] data = new float[position * originalClip.channels];
             originalClip.GetData(data, 0);
-            
+
             // Set the data to the trimmed clip
             trimmedClip.SetData(data, 0);
-            
+
             // Store the trimmed clip instead of the original
             currentFieldNoteData.recordedAudioClip = trimmedClip;
             audioSource.clip = trimmedClip;
-            
+
             Debug.Log($"FieldNoteHandler: Voice recording stopped and stored. Clip length: {trimmedClip.length:F2}s");
         }
         UpdatePlaybackTimeText();
@@ -368,14 +371,14 @@ public class FieldNoteHandler : MonoBehaviour
         if (audioSource == null || currentFieldNoteData == null || currentFieldNoteData.recordedAudioClip == null)
         {
             Debug.LogWarning("FieldNoteHandler: No audio clip recorded or AudioSource missing for playback.");
-            if(playPauseToggleButton != null) playPauseToggleButton.ForceSetToggled(false); // Ensure toggle is off
-            
+            if (playPauseToggleButton != null) playPauseToggleButton.ForceSetToggled(false); // Ensure toggle is off
+
             // Make sure playback slider is inactive
             if (playbackSlider != null)
             {
                 playbackSlider.gameObject.SetActive(false);
             }
-            
+
             return;
         }
 
@@ -402,7 +405,7 @@ public class FieldNoteHandler : MonoBehaviour
                 audioSource.clip = currentFieldNoteData.recordedAudioClip;
                 audioSource.Play(); // Play from beginning
                 Debug.Log("FieldNoteHandler: Audio playback started.");
-                
+
                 // Reset slider position when starting from beginning
                 if (playbackSlider != null)
                 {
@@ -413,7 +416,7 @@ public class FieldNoteHandler : MonoBehaviour
             }
         }
     }
-    
+
     // Find the Content GameObject where note cards will be spawned - optimized version
     private void FindContentGameObject()
     {
@@ -422,13 +425,13 @@ public class FieldNoteHandler : MonoBehaviour
         {
             // PERFORMANCE OPTIMIZATION: Use direct transform.Find for better performance than recursive search
             Transform contentTransform = fieldNoteBook.transform.Find("Content");
-            
+
             // If direct search fails, fall back to recursive search
             if (contentTransform == null)
             {
                 contentTransform = FindExactChildRecursively(fieldNoteBook.transform, "Content");
             }
-            
+
             if (contentTransform != null)
             {
                 contentGameObject = contentTransform.gameObject;
@@ -512,14 +515,14 @@ public class FieldNoteHandler : MonoBehaviour
         if (updateTimer >= UPDATE_INTERVAL)
         {
             updateTimer = 0f;
-            
+
             // Check for updates to Spec Results only when needed
             if (isEditModeEnabled)
             {
                 CheckForSpecResultsUpdate();
             }
         }
-        
+
         // Update audio playback UI - this needs to run every frame for smoothness
         if (audioSource != null && audioSource.clip != null)
         {
@@ -683,7 +686,7 @@ public class FieldNoteHandler : MonoBehaviour
         currentFieldNoteData.durability = durability;
         Debug.Log($"Durability updated: {durability}");
     }
-   
+
     private void CheckForSpecResultsUpdate()
     {
         // Skip if essential references for Spec Results are missing or edit mode is disabled
@@ -835,7 +838,7 @@ public class FieldNoteHandler : MonoBehaviour
 
             // Split into two arrays for the two columns
             int halfLength = compounds.Length / 2 + compounds.Length % 2; // Ceiling division
-            
+
             // Format each row with the two columns
             for (int i = 0; i < halfLength; i++)
             {
@@ -948,9 +951,9 @@ public class FieldNoteHandler : MonoBehaviour
         {
             // Check if any mineral composition values are scientifically significant
             bool hasSignificantValue = false;
-            
+
             // Ensure mineralComposition is not null before iterating
-            if (currentFieldNoteData.mineralComposition != null) 
+            if (currentFieldNoteData.mineralComposition != null)
             {
                 foreach (KeyValuePair<string, float> kvp in currentFieldNoteData.mineralComposition)
                 {
@@ -972,8 +975,8 @@ public class FieldNoteHandler : MonoBehaviour
                 sampleName = currentFieldNoteData.sampleName,
                 sampleId = currentFieldNoteData.sampleId,
                 // Ensure mineralComposition is initialized before copying
-                mineralComposition = currentFieldNoteData.mineralComposition != null ? 
-                    new Dictionary<string, float>(currentFieldNoteData.mineralComposition) : 
+                mineralComposition = currentFieldNoteData.mineralComposition != null ?
+                    new Dictionary<string, float>(currentFieldNoteData.mineralComposition) :
                     new Dictionary<string, float>(),
                 dateTime = currentFieldNoteData.dateTime,
                 evaTimeSeconds = currentFieldNoteData.evaTimeSeconds,
@@ -1055,7 +1058,7 @@ public class FieldNoteHandler : MonoBehaviour
             // PERFORMANCE: Use cached DateTime and a StringBuilder
             DateTime currentDate = DateTime.Now;
             stringBuilder.Clear();
-            
+
             // Build the text content
             stringBuilder.AppendFormat("date: {0}\n", currentDate.ToString("yyyy-MM-dd"));
 
@@ -1079,7 +1082,7 @@ public class FieldNoteHandler : MonoBehaviour
             TimeSpan missionTime = TimeSpan.FromSeconds(evaTimeSeconds);
 
             // Format mission time as hours:minutes:seconds
-            stringBuilder.AppendFormat("time: {0:D2}:{1:D2}:{2:D2}\n", 
+            stringBuilder.AppendFormat("time: {0:D2}:{1:D2}:{2:D2}\n",
                 (int)missionTime.TotalHours, // Get total hours (not just hours component)
                 missionTime.Minutes,
                 missionTime.Seconds);
@@ -1130,7 +1133,7 @@ public class FieldNoteHandler : MonoBehaviour
         gameObject.SetActive(false);
         Debug.Log("Field Note toggled off via button press");
     }
-    
+
     // --- PHOTO CAPTURE METHODS ---
     public void GeologicalPhotoCommandReceived()
     {
@@ -1149,47 +1152,64 @@ public class FieldNoteHandler : MonoBehaviour
     private IEnumerator CaptureAndDisplayGeologicalPhoto()
     {
         isCapturingPhoto = true;
-        Debug.Log("FieldNoteHandler: GeologicalPhotoCommandReceived. Waiting for end of frame to capture.");
+        Debug.Log("FieldNoteHandler: GeologicalPhotoCommandReceived. Capturing real-world view.");
 
-        // Wait until the end of the frame so that all rendering is complete
-        yield return new WaitForEndOfFrame();
-
-        Texture2D screenshotTexture = ScreenCapture.CaptureScreenshotAsTexture();
-
-        if (screenshotTexture != null)
+        // Check if camera manager is ready
+        if (!CameraManager.Instance.IsCameraReady())
         {
-            Debug.Log("FieldNoteHandler: Screenshot captured successfully.");
-            if (currentFieldNoteData != null) // Ensure currentFieldNoteData is initialized
-            {
-                currentFieldNoteData.capturedSampleImage = screenshotTexture; // Store in data
-            }
+            Debug.LogError($"FieldNoteHandler: Camera not ready for capture. Status: {CameraManager.Instance.GetCameraStatus()}");
+            isCapturingPhoto = false;
+            yield break;
+        }
 
-            if (samplePhotoDisplay != null)
+        // Wait a frame to ensure we get the latest camera frame
+        yield return null;
+
+        try
+        {
+            // Capture photo from the shared camera manager
+            Texture2D screenshotTexture = CameraManager.Instance.CapturePhoto();
+
+            if (screenshotTexture != null)
             {
-                // PERFORMANCE: Consider caching the sprite if photos will be taken multiple times
-                Sprite newSprite = Sprite.Create(screenshotTexture, new Rect(0, 0, screenshotTexture.width, screenshotTexture.height), new Vector2(0.5f, 0.5f));
-                samplePhotoDisplay.sprite = newSprite;
-                samplePhotoDisplay.color = Color.white; // Ensure it's fully opaque and visible
-                Debug.Log("FieldNoteHandler: Photo displayed on UI Image.");
+                Debug.Log("FieldNoteHandler: Real-world photo captured successfully.");
+                if (currentFieldNoteData != null) // Ensure currentFieldNoteData is initialized
+                {
+                    currentFieldNoteData.capturedSampleImage = screenshotTexture; // Store in data
+                }
+
+                if (samplePhotoDisplay != null)
+                {
+                    // PERFORMANCE: Consider caching the sprite if photos will be taken multiple times
+                    Sprite newSprite = Sprite.Create(screenshotTexture, new Rect(0, 0, screenshotTexture.width, screenshotTexture.height), new Vector2(0.5f, 0.5f));
+                    samplePhotoDisplay.sprite = newSprite;
+                    samplePhotoDisplay.color = Color.white; // Ensure it's fully opaque and visible
+                    Debug.Log("FieldNoteHandler: Photo displayed on UI Image.");
+                }
+                else
+                {
+                    Debug.LogWarning("FieldNoteHandler: samplePhotoDisplay (UI.Image) is null. Cannot display photo.");
+                }
             }
             else
             {
-                Debug.LogWarning("FieldNoteHandler: samplePhotoDisplay (UI.Image) is null. Cannot display photo.");
+                Debug.LogError("FieldNoteHandler: Failed to capture photo from CameraManager.");
             }
         }
-        else
+        catch (System.Exception e)
         {
-            Debug.LogError("FieldNoteHandler: ScreenCapture.CaptureScreenshotAsTexture() failed.");
+            Debug.LogError($"FieldNoteHandler: Error capturing photo: {e.Message}");
         }
+
         isCapturingPhoto = false;
     }
-    
+
     // --- AUDIO PLAYBACK UI METHODS ---
     // Updates the playback slider position based on current audio playback
     private void UpdatePlaybackSliderPosition()
     {
         if (playbackSlider == null || audioSource.clip == null) return;
-        
+
         isUpdatingPlaybackSlider = true;
         playbackSlider.Value = audioSource.time / audioSource.clip.length;
         isUpdatingPlaybackSlider = false;
@@ -1199,14 +1219,14 @@ public class FieldNoteHandler : MonoBehaviour
     private void OnPlaybackSliderChanged(SliderEventData eventData)
     {
         if (isUpdatingPlaybackSlider || audioSource.clip == null) return;
-        
+
         // Calculate position in seconds based on slider value
         float newPosition = eventData.NewValue * audioSource.clip.length;
         audioSource.time = newPosition;
-        
+
         // If paused, we want to ensure the audio source position is updated
         // but not start playing automatically
-        if (!audioSource.isPlaying) 
+        if (!audioSource.isPlaying)
         {
             audioSource.Play();
             audioSource.Pause();
@@ -1238,7 +1258,7 @@ public class FieldNoteHandler : MonoBehaviour
     private void UpdatePlaybackTimeText()
     {
         if (playbackTimeText == null) return;
-        
+
         if (audioSource == null || audioSource.clip == null)
         {
             playbackTimeText.text = "00:00 / 00:00";
@@ -1247,13 +1267,13 @@ public class FieldNoteHandler : MonoBehaviour
 
         float currentTime = audioSource.time;
         float totalTime = audioSource.clip.length;
-        
+
         // PERFORMANCE: StringBuilder for string formatting
         stringBuilder.Clear();
         stringBuilder.Append(FormatTimeMMSS(currentTime));
         stringBuilder.Append(" / ");
         stringBuilder.Append(FormatTimeMMSS(totalTime));
-        
+
         playbackTimeText.text = stringBuilder.ToString();
     }
 
@@ -1269,12 +1289,41 @@ public class FieldNoteHandler : MonoBehaviour
                 break;
             }
         }
-        
+
         // Find the checklist manager and send the update
         ProcedureChecklistManager checklistManager = UnityEngine.Object.FindAnyObjectByType<ProcedureChecklistManager>();
         if (checklistManager != null)
         {
             checklistManager.UpdateScanStepText(isSignificant);
+        }
+    }
+    void OnDestroy()
+    {
+        // Unregister from camera manager
+        if (CameraManager.Instance != null)
+        {
+            CameraManager.Instance.UnregisterFieldNote();
+            Debug.Log("FieldNoteHandler: Unregistered from CameraManager.");
+        }
+    }
+
+    void OnDisable()
+    {
+        // Also unregister when field note is disabled (but not destroyed)
+        if (CameraManager.Instance != null)
+        {
+            CameraManager.Instance.UnregisterFieldNote();
+            Debug.Log("FieldNoteHandler: Unregistered from CameraManager due to disable.");
+        }
+    }
+
+    void OnEnable()
+    {
+        // Re-register when field note is re-enabled
+        if (CameraManager.Instance != null && gameObject.activeInHierarchy)
+        {
+            CameraManager.Instance.RegisterFieldNote();
+            Debug.Log("FieldNoteHandler: Re-registered with CameraManager due to enable.");
         }
     }
 }

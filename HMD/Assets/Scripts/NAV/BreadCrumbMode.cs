@@ -11,11 +11,10 @@ namespace Microsoft.MixedReality.Toolkit.UI
     {
         [SerializeField] private GameObject breadcrumbPrefab; // Drag your breadcrumb prefab here
         [SerializeField] private float distanceThreshold = 5f; // Adjust the distance threshold as needed
-
+        [SerializeField] private Transform parentObject; 
         [SerializeField] private IMUDataHandler imuDataHandler;        // drag your IMUDataHandler
         [SerializeField] private EVANumberHandler evaNumberHandler;
         // Used for highlighting when a mode is currently activated
-        [SerializeField] private GameObject breadCrumbBackplate;
         public TextMeshPro breadCrumbStatusText;
       
 
@@ -37,13 +36,9 @@ namespace Microsoft.MixedReality.Toolkit.UI
             {
                 // Start auto drop if it is active
                 StartCoroutine(AutoDropBreadcrumbs());
-                HighlightButton(breadCrumbBackplate);
+                
             }
-            else
-            {
-                // Unhighlight button if breadcrumb mode is not active
-                UnhighlightButton(breadCrumbBackplate);
-            }
+           
             UpdateBreadcrumbStatusText(); // Update the status text
         }
 
@@ -67,6 +62,7 @@ namespace Microsoft.MixedReality.Toolkit.UI
                     // Drop a breadcrumb at the current position
                     GameObject breadcrumb = Instantiate(breadcrumbPrefab, Camera.main.transform.position, Quaternion.identity);
 
+                    breadcrumb.transform.SetParent(parentObject, worldPositionStays: true); // Set parent
 
                     // Assign the "Breadcrumb" tag to the dropped breadcrumb prefab
                     breadcrumb.tag = "Breadcrumb";
@@ -100,23 +96,6 @@ namespace Microsoft.MixedReality.Toolkit.UI
             }
         }
 
-        private void HighlightButton(GameObject backplate)
-        {
-            // Activate the transparent yellow backplate
-            if (backplate != null)
-            {
-                backplate.SetActive(true);
-            }
-        }
-
-        private void UnhighlightButton(GameObject backplate)
-        {
-            // Deactivate the transparent yellow backplate
-            if (backplate != null)
-            {
-                backplate.SetActive(false);
-            }
-        }
 
     }
 }
