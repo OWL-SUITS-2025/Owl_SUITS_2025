@@ -49788,7 +49788,7 @@ MonoBehaviour:
   generalPinBackplate: {fileID: 1181207096}
   hazardPinBackplate: {fileID: 2081819470}
   samplePinBackplate: {fileID: 2029030426}
-  roverDataHandler: {fileID: 1286106080}
+  roverDataHandler: {fileID: 0}
   onGeneralPinClick:
     m_PersistentCalls:
       m_Calls: []

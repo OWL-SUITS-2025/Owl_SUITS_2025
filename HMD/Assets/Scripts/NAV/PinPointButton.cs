@@ -96,11 +96,13 @@ public class PinPointButton : MonoBehaviour
     private void Update()
     {
         isPing = roverDataHandler.GetPing();
+        Debug.LogWarning("Ping: " + isPing);
         // Only proceed if nav is open, ping is true, and we haven't created yet
         if (isPing && !poiCreated)
         {
+            Debug.LogWarning("Creating POIs");
             PlacePOI("POI 1", new Vector2(roverDataHandler.GetPOI1x(), roverDataHandler.GetPOI1y()));
-            PlacePOI("POI 2", new Vector2(roverDataHandler.GetPOI2x(), roverDataHandler.GetPOI3y()));
+            PlacePOI("POI 2", new Vector2(roverDataHandler.GetPOI2x(), roverDataHandler.GetPOI2y()));
             PlacePOI("POI 3", new Vector2(roverDataHandler.GetPOI3x(), roverDataHandler.GetPOI3y()));
             poiCreated = true;
         }
@@ -166,6 +168,8 @@ public class PinPointButton : MonoBehaviour
 
 
             distanceText.text = $"Name:{labelText}\nType: {type}\nX: {pinPosition.x}\nY: {pinPosition.y} ";
+
+            PinRegistry.AddPin(new PinData(POImap.x, POImap.y, labelText, new string[0], "", "general", 0, null));
 
 
 
