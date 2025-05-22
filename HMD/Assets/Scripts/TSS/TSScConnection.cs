@@ -49,6 +49,7 @@ public class TSScConnection : MonoBehaviour
         this.host = host;
         
         this.port = "24329";
+        // this.port = "14141"; // NASA USE THIS!!!!!
         this.team_number = team_number;
         this.url = "http://" + this.host + ":" + this.port;
         Debug.Log("Connecting to TSSc with URL: " + this.url);
@@ -369,7 +370,7 @@ public class TSScConnection : MonoBehaviour
     }
 
     IEnumerator GetROVER_TELEMETRYState()
-    {
+    {   
         // adding a -1 to the team number to get the correct telemetry data
         // this is because the team number on the dashboard is 1-indexed
         // but the backend data is 0-indexed
