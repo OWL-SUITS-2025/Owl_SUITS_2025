@@ -74,7 +74,7 @@ public class LaunchMenuHandlers : MonoBehaviour
         // Use this to HARDCODE the server address
 
         // Using NASA Rockyard IP:
-        //host = "192.168.51.110";
+        //host = "192.168.51.110"; //NASA USE THIS!!!!!
 
         // Using Local Server:
         host = "147.185.221.27";
