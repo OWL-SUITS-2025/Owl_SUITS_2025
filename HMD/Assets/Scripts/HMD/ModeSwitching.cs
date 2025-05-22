@@ -27,14 +27,24 @@ public class ModeSwitching : MonoBehaviour
     }
 
     public void ToggleEgressMode()
-    {
+    {   if (TaskManager.Instance != null)
+        {
+            TaskManager.Instance.SetCurrentTaskIndex(0); // Reset the task index for Ingress/Egress
+        }
+        else
+        {
+            Debug.LogError("TaskManager Instance is null.  Egress task index not reset.");
+        }
+        // TaskManager.Instance.SetCurrentTaskIndex(0); // Reset the task index for Ingress/Egress
         DisableAllHUDs();
         egressHUD.SetActive(true);
+        
         UpdateModeText("EGRESS IN PROGRESS", Color.green);
     }
 
     public void ToggleGeoMode()
     {
+        
         DisableAllHUDs();
         geoHUD.SetActive(true);
         UpdateModeText("GEO IN PROGRESS", Color.red);
@@ -49,6 +59,15 @@ public class ModeSwitching : MonoBehaviour
 
     public void ToggleIngressMode()
     {
+        if (TaskManager.Instance != null)
+        {
+            TaskManager.Instance.SetCurrentTaskIndex(0); // Reset the task index for Ingress/Egress
+        }
+        else
+        {
+            Debug.LogError("TaskManager Instance is null.  Egress task index not reset.");
+        }
+        // TaskManager.Instance.SetCurrentTaskIndex(0); // Reset the task index for Ingress/Egress
         DisableAllHUDs();
         ingressHUD.SetActive(true);
         UpdateModeText("INGRESS IN PROGRESS", Color.magenta);

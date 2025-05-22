@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class TaskManager : MonoBehaviour
 {
+
     public static TaskManager Instance { get; private set; }
 
     private int currentTaskIndex = 0;
@@ -17,7 +18,7 @@ public class TaskManager : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            // Destroy(gameObject);
         }
     }
 

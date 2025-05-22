@@ -55,18 +55,19 @@ public class EgressTaskController : MonoBehaviour
     private string evaIDString; // will be "eva1" or "eva2" depending on if ev1 or ev2 is selected at boot
 
 
+    
 
     // Indices for UIAPanelImage overlays array
-        // PWREV1 (0)
-        // PWREV2 (1)
-        // O2EV1 (2)
-        // O2EV2 (3)
-        // O2Vent (4)
-        // H2OWasteEV1 (5)
-        // H2OWasteEV2 (6)
-        // DepressPumpPWR (7)
-        // H2OSupplyEV1 (8)
-        // H2OSupplyEV2 (9)
+    // PWREV1 (0)
+    // PWREV2 (1)
+    // O2EV1 (2)
+    // O2EV2 (3)
+    // O2Vent (4)
+    // H2OWasteEV1 (5)
+    // H2OWasteEV2 (6)
+    // DepressPumpPWR (7)
+    // H2OSupplyEV1 (8)
+    // H2OSupplyEV2 (9)
     private int overlayEMUPowerIndex;
     private int overlayEMUOxygenIndex;
     private const int OVERLAY_O2_VENT_INDEX = 4; // since this don't matter regarding eva number
@@ -129,6 +130,7 @@ public class EgressTaskController : MonoBehaviour
 
     private void Start()
     {
+        // Debug.Log("EgressTaskController: Start() called");
         // redone the way we get the EVA number bc we only need to display one EVA
         if (evaNumberHandler == null)
         {
@@ -151,7 +153,7 @@ public class EgressTaskController : MonoBehaviour
         // Initialize task text with correct EV number
         FormatTaskStrings();
         currentTaskIndex = TaskManager.Instance.GetCurrentTaskIndex(); // Ensure we start at the correct task if reloaded
-        if(currentTaskIndex >= tasks.Length) // Safety check if TaskManager holds an out-of-bounds index
+        if (currentTaskIndex >= tasks.Length) // Safety check if TaskManager holds an out-of-bounds index
         {
             TaskManager.Instance.SetCurrentTaskIndex(0);
             currentTaskIndex = 0;
@@ -175,6 +177,7 @@ public class EgressTaskController : MonoBehaviour
         // Switching from complete Egress (max step index=30) to new Ingress (max step index=12)
         // 30 > 12 -> array out of bounds error!
         currentTaskIndex = 0;
+        TaskManager.Instance.SetCurrentTaskIndex(0);
     }
     private void FormatTaskStrings()
     {
@@ -540,7 +543,7 @@ public class EgressTaskController : MonoBehaviour
             case 27: // Procedure Complete
                 taskCompleted = true; // Final step is just text
                 currentOverlayColor = completedColor;
-                taskStatusTextMeshPro.text = "Egress Complete! Confirm with PR team that comms are working.";
+                taskStatusTextMeshPro.text = "Egress Complete! Confirm with PR team that comms are working.\nStay safe!";
                 break;
 
             default:
