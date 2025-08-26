@@ -12,8 +12,8 @@ public class LaunchMenuHandlers : MonoBehaviour
     public Color selectedColor = Color.green;
     public Color unselectedColor = Color.white;
 
-    
-     [Header("Text References")]
+
+    [Header("Text References")]
     public TextMeshPro EV1Text;
     public TextMeshPro EV2Text;
 
@@ -112,7 +112,7 @@ public class LaunchMenuHandlers : MonoBehaviour
 
             // Activate the array of game objects
             ActivateObjects();
-            
+
         }
         else
         {
