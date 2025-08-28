@@ -57,4 +57,4 @@ Our project develops an **augmented reality (AR) interface** on the HoloLens 2 t
 
 ## 📖 About NASA SUITS
 
-The **NASA SUITS Challenge** invites student teams to design and develop next-generation AR interfaces that will help astronauts during Artemis missions. Learn more: [NASA SUITS Website](https://www.nasa.gov/stem/suits/](https://www.nasa.gov/learning-resources/spacesuit-user-interface-technologies-for-students/))
+The **NASA SUITS Challenge** invites student teams to design and develop next-generation AR interfaces that will help astronauts during Artemis missions. Learn more: [NASA SUITS Website](https://www.nasa.gov/learning-resources/spacesuit-user-interface-technologies-for-students/)
