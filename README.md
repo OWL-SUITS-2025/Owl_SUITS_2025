@@ -16,22 +16,35 @@ Our project develops an **augmented reality (AR) interface** on the HoloLens 2 t
 * **Collaboration Tools** – Supports communication and data sharing with mission control.
 
 ## 🛰️ Mission Concept & Tasks  
+### Geological Sampling  
 
-### Ingress / Egress
-
-* Demonstrate effective and efficient methods for completing the UIA (Umbilical Interface Assembly) procedures used to initiate and complete an EVA by preparing and checking the spacesuit’s portable life support systems.  
-* Utilizes just in time notifications and highlighted guides to assist with the process.
+* Inlcudes geological notebook integrated with XRF Spectrometer for elemental analysis. 
+* Demonstrate how the AR system can increase crewmember efficiency and reduce cognitive load during sample collection.
+* Ensure interoperability so that the PR (Pressurized Rover) can view data as it is collected.
 
 ### EV Navigation
 
 * Implements a pin placing system to assist with navigation, avoid lunar hazards, and identify geological samples.
 * Provide a “breadcrumbs” feature for retracing a path.
 
-### Geological Sampling  
+### Ingress / Egress
 
-* Inlcudes geological notebook integrated with XRF Spectrometer for elemental analysis. 
-* Demonstrate how the AR system can increase crewmember efficiency and reduce cognitive load during sample collection.
-* Ensure interoperability so that the PR (Pressurized Rover) can view data as it is collected.
+* Demonstrate effective and efficient methods for completing the UIA (Umbilical Interface Assembly) procedures used to initiate and complete an EVA by preparing and checking the spacesuit’s portable life support systems.  
+* Utilizes just in time notifications and highlighted guides to assist with the process.
+
+## 📸 Demo
+<div align="center">
+
+| Geo Demo | Nav Demo |
+|----------|----------|
+| <img src="content/geo_demo_short.gif" width="400"/> | <img src="content/nav_short_demo.gif" width="400"/> |
+
+
+| Ingress/Egress Demo |  
+|---------------------|
+| <img src="content/ingress-short-test.gif" width="400"/> |
+
+</div>
 
 ## 🛠️ Tech Stack
 
@@ -47,20 +60,6 @@ Our project develops an **augmented reality (AR) interface** on the HoloLens 2 t
 * 📘 [Exit Pitch](https://github.com/OWL-SUITS-2025/Owl_SUITS_2025/blob/main/content/NASA%20SUITS%20Exit%20Pitch%20May%202025.pdf)
 * 📸 [Exit Pitch Video](https://www.youtube.com/live/2fiBoE0x6wE?si=X_I6vfQUIXEfKbDV&t=3849)
 * 📂 [NASA SUITS Mission Description](https://drive.google.com/file/d/1cX8_v-_m_uQak2HYoOpUtQoYojI-I63m/view?usp=sharing)
-
-## 📸 Demo
-<div align="center">
-
-| Geo Demo | Nav Demo |
-|----------|----------|
-| <img src="content/geo_demo_short.gif" width="400"/> | <img src="content/nav_short_demo.gif" width="400"/> |
-
-
-| Ingress/Egress Demo |  
-|---------------------|
-| <img src="content/ingress-short-test.gif" width="400"/> |
-
-</div>
 
 ## 📖 About NASA SUITS
 
