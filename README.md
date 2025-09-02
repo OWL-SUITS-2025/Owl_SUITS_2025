@@ -42,9 +42,9 @@ Our project develops an **augmented reality (AR) interface** on the HoloLens 2 t
 
 ## 📖 Resources & Links
 
-* 📘 [Proposal](https://docs.google.com/document/d/1PcB0ZTBY3s5H4OZfvU3oWCtm59bli4tEMxpLIZt2VuA/edit?usp=sharing)
-* 📘 [Work Guide](https://docs.google.com/document/d/1BzoUljcLIsPXOgS4SbhiVLoFmqDFteWucLqJIcHvoZE/edit?usp=sharing)
-* 📘 [Exit Pitch](https://docs.google.com/presentation/d/1QFlcyKhBa79pro1WQT1xsww55dHRnK0G3i2w3ToNO3Y/edit?usp=sharing)
+* 📘 [Proposal](https://github.com/OWL-SUITS-2025/Owl_SUITS_2025/blob/main/content/2024%20Proposal.pdf)
+* 📘 [Work Guide](https://github.com/OWL-SUITS-2025/Owl_SUITS_2025/blob/main/content/OWL%20SUITS%20Work%20Guide.pdf)
+* 📘 [Exit Pitch](https://github.com/OWL-SUITS-2025/Owl_SUITS_2025/blob/main/content/NASA%20SUITS%20Exit%20Pitch%20May%202025.pdf)
 * 📸 [Exit Pitch Video](https://www.youtube.com/live/2fiBoE0x6wE?si=X_I6vfQUIXEfKbDV&t=3849)
 * 📂 [NASA SUITS Mission Description](https://drive.google.com/file/d/1cX8_v-_m_uQak2HYoOpUtQoYojI-I63m/view?usp=sharing)
 
