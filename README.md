@@ -49,11 +49,18 @@ Our project develops an **augmented reality (AR) interface** on the HoloLens 2 t
 * 📂 [NASA SUITS Mission Description](https://drive.google.com/file/d/1cX8_v-_m_uQak2HYoOpUtQoYojI-I63m/view?usp=sharing)
 
 ## 📸 Demo
+<div align="center">
+
 | Geo Demo | Nav Demo |
 |----------|----------|
-| ![Sampling Demo](content/geo_demo_short.gif) | ![Navigation Demo](content/nav_short_demo.gif) |
+| <img src="content/geo_demo_short.gif" width="400"/> | <img src="content/nav_short_demo.gif" width="400"/> |
 
 
+| Ingress/Egress Demo |  
+|---------------------|
+| <img src="content/ingress-short-test.gif" width="400"/> |
+
+</div>
 
 ## 📖 About NASA SUITS
 
