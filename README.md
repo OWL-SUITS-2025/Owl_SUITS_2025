@@ -59,6 +59,7 @@ Our project develops an **augmented reality (AR) interface** on the HoloLens 2 t
 * 📘 [Work Guide](https://github.com/OWL-SUITS-2025/Owl_SUITS_2025/blob/main/content/OWL%20SUITS%20Work%20Guide.pdf)
 * 📘 [Exit Pitch](https://github.com/OWL-SUITS-2025/Owl_SUITS_2025/blob/main/content/NASA%20SUITS%20Exit%20Pitch%20May%202025.pdf)
 * 📸 [Exit Pitch Video](https://www.youtube.com/live/2fiBoE0x6wE?si=X_I6vfQUIXEfKbDV&t=3849)
+* 📊 [Research Poster](https://github.com/OWL-SUITS-2025/Owl_SUITS_2025/blob/main/content/NASA%20SUITS%20Poster%20Spring%2025.pdf)
 * 📂 [NASA SUITS Mission Description](https://drive.google.com/file/d/1cX8_v-_m_uQak2HYoOpUtQoYojI-I63m/view?usp=sharing)
 
 ## 📖 About NASA SUITS
